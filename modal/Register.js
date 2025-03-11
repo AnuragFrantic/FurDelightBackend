@@ -1,5 +1,4 @@
 const { Schema, default: mongoose } = require("mongoose");
-
 const schema = new Schema(
     {
         username: {
@@ -7,6 +6,24 @@ const schema = new Schema(
             unique: true,
             required: true,
             trim: true
+        },
+        about: {
+            type: String
+        },
+        work_experience: {
+            type: Number,
+        },
+        graduation_certificate: {
+            type: String,
+        },
+        post_graduation_certificate: {
+            type: String,
+        },
+        mci_certificate: {
+            type: String,
+        },
+        gender: {
+            type: String
         },
         email: {
             type: String,
@@ -33,6 +50,7 @@ const schema = new Schema(
             type: String,
             enum: ["User", "Doctor", 'Admin'],
         },
+
         deleted_at: { type: Date },
         created_by: {
             type: mongoose.Schema.Types.ObjectId,
