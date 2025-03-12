@@ -18,4 +18,4 @@ const schema = new Schema({
 
 
 
-module.exports = mongoose.model("Brand", schema);
+module.exports = mongoose.model("Category", schema);

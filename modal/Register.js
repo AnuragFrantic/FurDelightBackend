@@ -16,6 +16,7 @@ const schema = new Schema(
         graduation_certificate: {
             type: String,
         },
+
         post_graduation_certificate: {
             type: String,
         },
@@ -46,10 +47,17 @@ const schema = new Schema(
             type: String,
             required: true
         },
-        type: {
-            type: String,
-            enum: ["User", "Doctor", 'Admin'],
+        
+        user_type: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "UserType"
         },
+        roles: [
+            {
+                type: { type: mongoose.Schema.Types.ObjectId, ref: 'Modules', required: false, default: null },
+                value: [{ type: String, required: false }]
+            }
+        ],
 
         deleted_at: { type: Date },
         created_by: {

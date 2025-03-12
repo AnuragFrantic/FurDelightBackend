@@ -1,9 +1,9 @@
 const { Schema, default: mongoose } = require('mongoose')
 
 const schema = new Schema({
-    title: { type: String },
-    detail: { type: String },
-    image: { type: String },
+    question: { type: String },
+    answer: { type: String },
+
     deleted_at: { type: Date },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
@@ -18,4 +18,4 @@ const schema = new Schema({
 
 
 
-module.exports = mongoose.model("Brand", schema);
+module.exports = mongoose.model("Faq", schema);
