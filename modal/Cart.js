@@ -17,10 +17,7 @@ const CartSchema = new mongoose.Schema({
         default: 1,
         min: 1,
     },
-    price: {
-        type: Number,
-        required: true, // Store price at the time of adding to the cart
-    },
+
 }, { timestamps: true });
 
 // Ensure unique (user, product) pairs to prevent duplicate items

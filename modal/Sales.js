@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 
-const OrderSchema = new mongoose.Schema({
+const Saleschema = new mongoose.Schema({
     order_id: {
         type: String,
     },
@@ -34,10 +34,9 @@ const OrderSchema = new mongoose.Schema({
         enum: ["cod", "credit_card", "debit_card", "paypal", "upi"],
         required: true,
     },
-
     deleted_at: {
         type: Date,
     },
 }, { timestamps: true });
 
-module.exports = mongoose.model("Order", OrderSchema);
+module.exports = mongoose.model("Sales", Saleschema);

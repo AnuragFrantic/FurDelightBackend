@@ -18,4 +18,4 @@ const schema = new Schema({
 
 
 
-module.exports = mongoose.model("PetActivity", schema);
+module.exports = mongoose.model("Banner", schema);

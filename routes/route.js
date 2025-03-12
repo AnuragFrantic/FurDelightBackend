@@ -5,6 +5,8 @@ const upload = require('../middleware/multerconfig');
 const { createUser, getAllUsers, getUserById, updateUser, deleteUser } = require('../controller/UserController');
 const { sendOtp, verifyOtp, getAllOtp } = require('../controller/Auth/LoginController');
 const { createSplashScreen, updateSplashScreen, getAllSplash } = require('../controller/SplashController');
+const { createBanner, getallbanner, updatebanner, deleteBanner } = require('../controller/BannerController');
+const { getallBrand } = require('../controller/BrandController');
 
 
 const router = express.Router();
@@ -53,6 +55,22 @@ router.get('/splash', getAllSplash)
 
 router.post('/splash', upload.single('image'), createSplashScreen)
 router.put("/splash/:id", upload.single("image"), updateSplashScreen);
+
+
+
+// banner
+
+router.post('/create_banner', upload.single('image'), createBanner)
+router.get('/banner', getallbanner)
+router.put('/banner_update/:id', updatebanner)
+router.delete('/banner_delete/:id', deleteBanner)
+
+
+// brand
+router.get('/brand', getallBrand)
+
+
+
 
 
 

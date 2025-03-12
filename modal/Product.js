@@ -12,8 +12,8 @@ const schema = new Schema({
     discount_price: { type: Number },
 
     rating: { type: Number, default: 0 },
-    wishlist_status: { type: Boolean, default: false },
-    quantity: { type: Number, default: 1 },
+
+    // quantity: { type: Number, default: 1 },
     stock: { type: Number, required: true },
     stock_status: { type: String, enum: ['in_stock', 'out_of_stock', 'pre_order'], default: 'in_stock' },
     sku: { type: String, unique: true, required: true },
