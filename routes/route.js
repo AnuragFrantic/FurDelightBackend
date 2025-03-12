@@ -6,7 +6,7 @@ const { createUser, getAllUsers, getUserById, updateUser, deleteUser } = require
 const { sendOtp, verifyOtp, getAllOtp } = require('../controller/Auth/LoginController');
 const { createSplashScreen, updateSplashScreen, getAllSplash } = require('../controller/SplashController');
 const { createBanner, getallbanner, updatebanner, deleteBanner } = require('../controller/BannerController');
-const { getallBrand } = require('../controller/BrandController');
+const { getallBrand, createBrand, deleteBrand, updateBrand } = require('../controller/BrandController');
 
 
 const router = express.Router();
@@ -68,6 +68,14 @@ router.delete('/banner_delete/:id', deleteBanner)
 
 // brand
 router.get('/brand', getallBrand)
+router.post('/brand', upload.single('image'), createBrand)
+router.put('/update_brand/:id', updateBrand)
+
+router.delete('/delete_brand/:id', deleteBrand)
+
+
+
+
 
 
 

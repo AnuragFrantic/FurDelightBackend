@@ -6,14 +6,10 @@ const Brand = require('../modal/Brands');
 exports.createBrand = async (req, res) => {
     try {
         const brand = new Brand(req.body);
-
         if (req.file) {
             brand.image = req.file.path
         }
-
-
         await brand.save();
-
         res.status(201).json({
             success: true,
             message: "Brand created successfully",
@@ -72,11 +68,11 @@ exports.updateBrand = async (req, res) => {
 exports.deleteBrand = async (req, res) => {
     try {
         const { id } = req.params
-        const bannerdata = await Brand.findByIdAndDelete(id)
-        if (!bannerdata) {
+        const branddata = await Brand.findByIdAndDelete(id)
+        if (!branddata) {
             return res.status(404).json({ error: 1, message: "Brand not found" })
         }
-        res.status(200).json({ success: true, message: "Brand deleted successfully!", data: bannerdata, error: 0 });
+        res.status(200).json({ success: true, message: "Brand deleted successfully!", data: branddata, error: 0 });
     } catch (err) {
         console.log(err)
         res.status(500).json({ error: 1, message: "Internal Server Error", details: err.message });
