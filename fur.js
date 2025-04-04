@@ -23,7 +23,7 @@ dotenv.config();
 process.env.TZ = "Asia/Kolkata";
 
 
-const port = process.env.PORT;
+const port = process.env.PORT || 9832;
 
 app.use('/uploads', express.static('uploads'))
 
