@@ -1,8 +1,6 @@
 
 const Brand = require('../modal/Brands');
 
-
-
 exports.createBrand = async (req, res) => {
     try {
         const brand = new Brand(req.body);

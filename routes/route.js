@@ -1,10 +1,10 @@
 const express = require('express');
-const { createUserType, getAllUserTypes, getUserTypeById, deleteUserType, updateUserType } = require('../controller/UserTypeController');
+const { createUserType, getAllUserTypes, getUserTypeById, updateUserType } = require('../controller/UserTypeController');
 const { verifyRoles } = require('../middleware/verifyroles');
 const upload = require('../middleware/multerconfig');
 const { createUser, getAllUsers, getUserById, updateUser, deleteUser } = require('../controller/UserController');
 const { sendOtp, verifyOtp, getAllOtp } = require('../controller/Auth/LoginController');
-const { createSplashScreen, updateSplashScreen, getAllSplash } = require('../controller/SplashController');
+const { createSplashScreen, updateSplashScreen, getAllSplash, deleteSplash } = require('../controller/SplashController');
 const { createBanner, getallbanner, updatebanner, deleteBanner } = require('../controller/BannerController');
 const { getallBrand, createBrand, deleteBrand, updateBrand } = require('../controller/BrandController');
 
@@ -44,18 +44,15 @@ router.delete("/delete_user/:id", deleteUser);
 // otp
 
 router.post("/send-otp", sendOtp);
-
-
 router.post("/verify-otp", verifyOtp);
 router.get("/allotp", getAllOtp);
 
 // splash api 
 
 router.get('/splash', getAllSplash)
-
 router.post('/splash', upload.single('image'), createSplashScreen)
 router.put("/splash/:id", upload.single("image"), updateSplashScreen);
-
+router.delete('/delete_splash/:id', deleteSplash)
 
 
 // banner
@@ -70,7 +67,6 @@ router.delete('/banner_delete/:id', deleteBanner)
 router.get('/brand', getallBrand)
 router.post('/brand', upload.single('image'), createBrand)
 router.put('/update_brand/:id', updateBrand)
-
 router.delete('/delete_brand/:id', deleteBrand)
 
 

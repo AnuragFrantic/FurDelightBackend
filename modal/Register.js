@@ -47,7 +47,7 @@ const schema = new Schema(
             type: String,
             required: true
         },
-        
+
         user_type: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "UserType"
