@@ -4,12 +4,14 @@ const schema = new Schema({
     name: {
         type: String
     },
+    image: { type: String },
     breed: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'PetBreed'
     },
     gender: {
-        type: String
+        type: String,
+        enum: ['Female', 'Male'],
     },
     age: {
         type: Number
@@ -25,10 +27,8 @@ const schema = new Schema({
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PetFood'
-
         }
     ],
-
     meals_per_day: {
         type: Number
     },

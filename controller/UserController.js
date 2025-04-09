@@ -1,4 +1,4 @@
-const User = require("../modal/Register");
+const User = require("../models/Register");
 
 
 exports.createUser = async (req, res) => {
@@ -52,7 +52,8 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        const userid = req.userId
+        const user = await User.findById(userid);
         if (!user) {
             return res.status(404).json({ error: 1, message: "User not found" });
         }

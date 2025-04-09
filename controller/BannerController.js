@@ -1,5 +1,5 @@
 
-const BannerModal = require('../modal/Banner')
+const BannerModal = require('../models/Banner')
 
 
 

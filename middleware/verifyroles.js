@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../modal/Usertype');
+const User = require('../models/Usertype');
 
 
 exports.verifyRoles = () => {

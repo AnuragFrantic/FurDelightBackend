@@ -10,9 +10,7 @@ const schema = new Schema({
     images: [ImageSchema],
     price: { type: Number, required: true },
     discount_price: { type: Number },
-
     rating: { type: Number, default: 0 },
-
     // quantity: { type: Number, default: 1 },
     stock: { type: Number, required: true },
     stock_status: { type: String, enum: ['in_stock', 'out_of_stock', 'pre_order'], default: 'in_stock' },
@@ -28,6 +26,9 @@ const schema = new Schema({
     materials: [{ type: String }],
     warranty: { type: String },
     return_policy: { type: String },
+    sell: {
+        type: Number,
+    },
 
     deleted_at: { type: Date },
     created_by: {

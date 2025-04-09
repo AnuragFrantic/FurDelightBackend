@@ -1,9 +1,13 @@
 const { Schema, default: mongoose } = require('mongoose')
 
 const schema = new Schema({
-    name: { type: String },
+    title: { type: String },
+    detail: { type: String },
+    pet_type: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Pettype'
+    },
     image: { type: String },
-    description: { type: String },
     deleted_at: { type: Date },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
@@ -13,8 +17,9 @@ const schema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
+
 }, { timestamps: true })
 
 
 
-module.exports = mongoose.model("PetBreed", schema);
+module.exports = mongoose.model("Category", schema);

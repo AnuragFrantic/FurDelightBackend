@@ -1,4 +1,4 @@
-const SplashScreen = require("../modal/SplashScreen");
+const SplashScreen = require("../models/SplashScreen");
 
 // Create a new splash screen with optional image upload
 exports.createSplashScreen = async (req, res) => {
