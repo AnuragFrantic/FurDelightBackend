@@ -2,6 +2,7 @@ const ProductModal = require('../models/Product')
 
 
 
+
 exports.createProduct = async (req, res) => {
     try {
         // Create a new product instance with the request body
