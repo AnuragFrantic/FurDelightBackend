@@ -35,7 +35,7 @@ exports.getAllCategory = async (req, res) => {
     try {
         const filter = { deleted_at: null };
         let data = await CategoryModal.find(filter)
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             message: "Category fetch successfully",
             data: data,

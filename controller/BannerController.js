@@ -21,7 +21,7 @@ exports.createBanner = async (req, res) => {
 exports.getallbanner = async (req, res) => {
     try {
         const bannerdata = await BannerModal.find()
-        res.status(201).json({ message: 'Banner Fetch successfully.', data: bannerdata, error: 0 });
+        res.status(200).json({ message: 'Banner Fetch successfully.', data: bannerdata, error: 0 });
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: 'Internal server error.', error: err.message, error: 1 });

@@ -29,7 +29,7 @@ exports.createBrand = async (req, res) => {
 exports.getallBrand = async (req, res) => {
     try {
         const brand = await Brand.find()
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             message: "Brand fetch successfully",
             data: brand,
