@@ -5,7 +5,6 @@ exports.createPet = async (req, res) => {
     try {
         const image = req.file ? req.file.path : null;
         const petData = { ...req.body };
-
         if (image) petData.image = image;
         if (req.userId) {
             petData.created_by = req.userId;
@@ -35,13 +34,66 @@ exports.createPet = async (req, res) => {
 };
 
 // GET ALL
+// exports.getAllPets = async (req, res) => {
+//     try {
+//         const pets = await Pet.find({ deleted_at: null }).populate({
+//             path: 'breed',
+//             options: { strictPopulate: false } // allows silent failure if the model isn't registered
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             data: pets,
+//             error: 0
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             error: 1,
+//             message: "Failed to fetch pets",
+//             details: error.message
+//         });
+//     }
+// };
+
 
 
 exports.getAllPets = async (req, res) => {
     try {
-        const pets = await Pet.find({ deleted_at: null }).populate({
+        let pets = await Pet.find({ deleted_at: null }).populate({
             path: 'breed',
-            options: { strictPopulate: false } // allows silent failure if the model isn't registered
+            options: { strictPopulate: false }
+        });
+
+        // Define keys you want to consider for profile completion
+        const fieldsToCheck = [
+            'name',
+            'image',
+            'breed',
+            'gender',
+            'age',
+            'vaccination',
+            'pet_eating',
+            'meals_per_day',
+            'daily_walk_routine',
+            'activity'
+        ];
+        const totalFields = fieldsToCheck.length;
+
+        // Calculate profile completion for each pet
+        pets = pets.map(pet => {
+            let filledFields = 0;
+            fieldsToCheck.forEach(field => {
+                if (Array.isArray(pet[field])) {
+                    if (pet[field].length > 0) filledFields++;
+                } else if (pet[field] !== undefined && pet[field] !== null && pet[field] !== '') {
+                    filledFields++;
+                }
+            });
+            const completion = Math.round((filledFields / totalFields) * 100);
+            return {
+                ...pet.toObject(),
+                profile_completion: completion
+            };
         });
 
         res.status(200).json({

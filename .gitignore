@@ -9,9 +9,9 @@ pnpm-lock.yaml
 
 # Environment variables
 
-.env.local
+.env.local  
 .env.development.local
-.env.test.local
+.env.test.local  
 .env.production.local
 
 # Logs

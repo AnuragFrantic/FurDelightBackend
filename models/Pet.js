@@ -19,6 +19,9 @@ const schema = new Schema({
     vaccination: {
         type: Boolean
     },
+    profile_completion: {
+        type: Number
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

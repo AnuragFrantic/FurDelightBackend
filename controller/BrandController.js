@@ -75,5 +75,4 @@ exports.deleteBrand = async (req, res) => {
         console.log(err)
         res.status(500).json({ error: 1, message: "Internal Server Error", details: err.message });
     }
-
 }

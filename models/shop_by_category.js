@@ -1,16 +1,21 @@
-const { Schema, default: mongoose } = require('mongoose')
+const mongoose = require('mongoose')
 
-const schema = new Schema({
-    title: { type: String },
-    detail: { type: String },
-    pet_type: {
+const ShopByCategory = new mongoose.Schema({
+    title: {
+        type: String
+    },
+
+    image: {
+        type: String
+    },
+    pet_category: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pettype'
+        ref: "Category",
+        required: true,
     },
     bg_color: {
         type: String
     },
-    image: { type: String },
     deleted_at: { type: Date },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
@@ -20,9 +25,8 @@ const schema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
-
 }, { timestamps: true })
 
 
 
-module.exports = mongoose.model("Category", schema);
+module.exports = mongoose.model("ShopByCategory", ShopByCategory);

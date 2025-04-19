@@ -2,7 +2,7 @@ const { Schema, default: mongoose } = require('mongoose')
 
 const schema = new Schema({
     name: { type: String },
-    image: { type: String },
+
     description: { type: String },
     deleted_at: { type: Date },
     created_by: {

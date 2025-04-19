@@ -24,7 +24,8 @@ const schema = new Schema(
             type: String,
         },
         gender: {
-            type: String
+            type: String,
+            enum: ["Male", "Female"]
         },
         email: {
             type: String,
@@ -36,9 +37,7 @@ const schema = new Schema(
         dob: {
             type: String,
         },
-        work_experience: {
-            type: Number
-        },
+
         password: {
             type: String,
             required: true

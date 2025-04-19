@@ -1,9 +1,11 @@
-const { Schema, default: mongoose } = require('mongoose')
+const mongoose = require("mongoose")
 
-const schema = new Schema({
-    name: { type: String },
-    image: { type: String },
-    bg_color: { type: String },
+
+const Unitschema = new mongoose.Schema({
+
+    title: {
+        type: String
+    },
     deleted_at: { type: Date },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
@@ -13,8 +15,11 @@ const schema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
+
 }, { timestamps: true })
 
 
 
-module.exports = mongoose.model("PetActivity", schema);
+module.exports = mongoose.model("Unit", Unitschema);
+
+
