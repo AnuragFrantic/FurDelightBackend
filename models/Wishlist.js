@@ -1,25 +1,50 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const WishlistSchema = new mongoose.Schema({
+const WishlistItemSchema = new Schema({
+    item: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        refPath: 'items.item_type'
+    },
+    item_type: {
+        type: String,
+        required: true,
+        enum: ['Product', 'User']
+    },
+    added_at: {
+        type: Date,
+        default: Date.now
+    }
+}, { _id: false });
+
+const WishlistSchema = new Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true
     },
-    products: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true
-    }],
-    deleted_at: { type: Date },
-    created_by: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+    items: [WishlistItemSchema],
+    type: {
+        type: String,
+        enum: ['product', 'doctor', 'mixed'],
+        default: 'mixed'
     },
+    is_deleted: {
+        type: Boolean,
+        default: false
+    },
+    deleted_at: {
+        type: Date
+    },
+
     updated_by: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User'
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Wishlist", WishlistSchema);
+WishlistSchema.index({ user: 1, 'items.item': 1 }, { unique: true });
+
+module.exports = mongoose.model('Wishlist', WishlistSchema);

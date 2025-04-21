@@ -50,7 +50,7 @@ const schema = new Schema(
         user_type: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "UserType",
-            require: true,
+            required: true,
         },
         roles: [
             {

@@ -163,3 +163,53 @@ exports.softDeleteProduct = async (req, res) => {
         res.status(500).json({ status: "Error", message: "Soft delete failed", error: 1 });
     }
 };
+
+
+
+exports.deleteProductImage = async (req, res) => {
+    try {
+        const { imageId } = req.params;
+
+        // Find the description containing the image to delete
+        const data = await ProductModal.findOneAndUpdate(
+            { "image._id": imageId },
+            { $pull: { image: { _id: imageId } } },
+            { new: true }
+        );
+
+
+
+        if (!data) {
+            return res.status(500).json({ message: "data not found" });
+        }
+
+        // Image successfully deleted
+        res.status(200).json({ message: "Image deleted successfully", data: data, error: 0 });
+    } catch (error) {
+        res.status(500).json({ message: error.message, error: 1 });
+    }
+};
+
+
+
+exports.clearAllProductImages = async (req, res) => {
+    try {
+        const { productid } = req.params;
+
+        // Find the description by ID and remove all images
+        const data = await ProductModal.findByIdAndUpdate(
+            productid,
+            { $set: { image: [] } },
+            { new: true }
+        );
+
+        if (!data) {
+            return res.status(500).json({ message: "data not found" });
+        }
+
+        // All images successfully deleted
+        res.status(200).json({ message: "All images deleted successfully", data: data, error: 0 });
+    } catch (error) {
+        res.status(500).json({ message: error.message, error: 1 });
+    }
+};

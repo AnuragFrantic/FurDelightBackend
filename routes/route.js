@@ -15,7 +15,7 @@ const { createPet, getAllPets, getPetById, updatePet, deletePet, getMyPets } = r
 const { createPetEssential, getAllPetEssentials, getPetEssentialById, updatePetEssential, deletePetEssential } = require('../controller/PetEssentialController');
 const { CreateCategory, getAllCategory, updateCategory, deleteCategory } = require('../controller/Categories');
 const { createShop, getAllShopCategory, updateShopCategory, deleteShopCategory } = require('../controller/ShopbyCateory');
-const { createProduct, getAllProducts, getProductById, updateProduct, softDeleteProduct } = require('../controller/ProductController');
+const { createProduct, getAllProducts, getProductById, updateProduct, softDeleteProduct, deleteProductImage, clearAllProductImages } = require('../controller/ProductController');
 const { createevents, getAllEvents, getEventsById, updateEvents, softDeleteEvents } = require('../controller/PetEvents');
 const { createUnit, getAllUnits, getUnitById, updateUnit, softDeleteUnit } = require('../controller/UnitController');
 const { createPetfoodType, getAllPetfoodtypes, getPetfoodtypeById, updatePetfoodtype, deletePetfoodtype } = require('../controller/PetFoodType');
@@ -23,6 +23,7 @@ const { CreatePetFood, getAllPetFood, updatePetFood, deletePetFood } = require('
 const { createPetActivity, getAllActivity, deletePetActivity, updatePetActivity } = require('../controller/PetActivityController');
 const { create_booking, get_booking } = require('../controller/BookingController');
 const { get_slot, create_slot, getAllSlots } = require('../controller/SlotController');
+const { getAllWishlists, getMyWishlist, getMyDoctorWishlist, deleteWishlist, addToWishlist } = require('../controller/WishlistController');
 
 
 
@@ -194,6 +195,8 @@ router.get('/product', getAllProducts);
 router.get('/product/:id', getProductById);
 router.put('/update_product/:id', upload.array('images', 10), updateProduct);
 router.delete('/product_delete/soft/:id', softDeleteProduct);
+router.delete("/delete-image/:imageId", deleteProductImage);
+router.delete("/product/:productid/images", clearAllProductImages);
 
 // events
 
@@ -279,6 +282,16 @@ router.post('/slot', authmiddleware, create_slot);
 router.get('/slot', get_slot);
 router.get('/slot/all', getAllSlots);
 
+
+
+// wishlist
+
+
+router.post('/wishlist', authmiddleware, addToWishlist);
+router.get('/wishlist', getAllWishlists); // admin
+router.get('/my_wishlist', authmiddleware, getMyWishlist);
+router.get('/wishlist/doctors', authmiddleware, getMyDoctorWishlist);
+router.delete('/wishlist/delete', authmiddleware, deleteWishlist);
 
 
 
