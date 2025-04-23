@@ -16,9 +16,9 @@ exports.create_category = async (req, res) => {
         const title = req.body.title;
         data['slug'] = makeSlug(title);
         const resp = await PrescriptionCategory.create(data);
-        return res.json({ success: 1, message: "PrescriptionCategory created successfull", data: resp });
+        return res.json({ success: true, error: 0, message: "PrescriptionCategory created successfull", data: resp });
     } catch (err) {
-        return res.json({ success: 0, message: err.message });
+        return res.json({ success: false, error: 1, message: err.message });
     }
 }
 exports.update_category = async (req, res) => {
@@ -28,53 +28,53 @@ exports.update_category = async (req, res) => {
         const title = req.body.title;
         data['slug'] = makeSlug(title);
         const resp = await PrescriptionCategory.findOneAndUpdate({ _id: id }, { $set: data });
-        return res.json({ success: 1, message: "PrescriptionCategory created successfull", data: resp });
+        return res.json({ success: true, error: 0, message: "PrescriptionCategory created successfull", data: resp });
     } catch (err) {
-        return res.json({ success: 0, message: err.message });
+        return res.json({ success: false, error: 1, message: err.message });
     }
 }
 exports.delete_category = async (req, res) => {
     const { id } = req.params;
     const resp = await PrescriptionCategory.deleteOne({ _id: id });
-    return res.json({ success: 1, message: "PrescriptionCategory deleted successfull", data: resp });
+    return res.json({ success: true, error: 0, message: "PrescriptionCategory deleted successfull", data: resp });
 }
 exports.get_category = async (req, res) => {
     const resp = await PrescriptionCategory.find();
-    return res.json({ success: 1, message: "List of Category", data: resp });
+    return res.json({ success: true, error: 0, message: "List of Category", data: resp });
 }
 exports.write_perscription = async (req, res) => {
     const { category, text, user } = req.body;
     const checkCategory = await PrescriptionCategory.findOne({ _id: category });
     if (!checkCategory) {
-        return res.json({ success: 0, message: "Invalid cateogry" });
+        return res.json({ success: false, error: 1, message: "Invalid cateogry" });
     }
     const findUser = await User.findOne({ _id: user });
     if (!findUser) {
-        return res.json({ success: 0, message: "patient not found" });
+        return res.json({ success: false, error: 1, message: "patient not found" });
     }
     const data = { category, user, text, doctor: req.userId };
     const resp = await Prescription.create(data);
-    return res.json({ success: 1, message: "Prescription created successfully", data: resp })
+    return res.json({ success: true, error: 0, message: "Prescription created successfully", data: resp })
 }
 exports.delete_perscription = async (req, res) => {
     const { id } = req.params;
     const resp = await Prescription.deleteOne({ _id: id });
-    return res.json({ success: 1, message: "Prescription deleted successfull", data: resp });
+    return res.json({ success: true, error: 0, message: "Prescription deleted successfull", data: resp });
 }
 exports.update_perscription = async (req, res) => {
     const { category, text, user } = req.body;
     const { id } = req.params;
     const checkCategory = await PrescriptionCategory.findOne({ _id: category });
     if (!checkCategory) {
-        return res.json({ success: 0, message: "Invalid cateogry" });
+        return res.json({ success: false, error: 1, message: "Invalid cateogry" });
     }
     const findUser = await User.findOne({ _id: user });
     if (!findUser) {
-        return res.json({ success: 0, message: "patient not found" });
+        return res.json({ success: false, error: 1, message: "patient not found" });
     }
     const data = { category, user, text, doctor: req.userId };
     const resp = await Prescription.findOneAndUpdate({ _id: id }, { $set: data });
-    return res.json({ success: 1, message: "Prescription updated successfully", data: resp })
+    return res.json({ success: true, error: 0, message: "Prescription updated successfully", data: resp })
 }
 exports.get_perscription = async (req, res) => {
     try {
@@ -101,8 +101,8 @@ exports.get_perscription = async (req, res) => {
             path: "user",
             select: 'custom_request_id name mobile gender dob address role profile_image'
         })
-        return res.json({ success: 1, message: "List of prescriptions", data: resp });
+        return res.json({ success: true, error: 0, message: "List of prescriptions", data: resp });
     } catch (err) {
-        return res.json({ success: 0, message: err.message })
+        return res.json({ success: false, error: 1, message: err.message })
     }
 }

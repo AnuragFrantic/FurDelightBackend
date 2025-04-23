@@ -13,7 +13,7 @@ exports.createUserType = async (req, res) => {
 
 exports.getAllUserTypes = async (req, res) => {
     try {
-        const userTypes = await UserType.find();
+        const userTypes = await UserType.find({ deleted_at: null });
         res.status(200).json({ message: 'UserTypes fetched successfully.', data: userTypes, error: 0 });
     } catch (error) {
         res.status(500).json({ message: 'Internal server error.', error: error.message, error: 1 });
@@ -40,13 +40,11 @@ exports.getUserTypeById = async (req, res) => {
 exports.updateUserType = async (req, res) => {
     try {
         const { id } = req.params;
-
         const userType = await UserType.findByIdAndUpdate(
             id,
             req.body,
             { new: true, runValidators: true }
         );
-
         if (!userType) {
             return res.status(404).json({ message: 'UserType not found.', error: 1 });
         }
@@ -62,14 +60,18 @@ exports.deleteUserType = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const userType = await UserType.findByIdAndDelete(id);
+        const userType = await UserType.findById(id);
 
-        if (!userType) {
-            return res.status(404).json({ message: 'UserType not found.', error: 1 });
+        if (!userType || userType.deleted_at) {
+            return res.status(404).json({ message: 'UserType not found or already deleted.', error: 1 });
         }
 
-        res.status(200).json({ message: 'UserType deleted successfully.', data: userType, error: 0 });
+        userType.deleted_at = new Date();
+        await userType.save();
+
+        res.status(200).json({ message: 'UserType soft deleted successfully.', data: userType, error: 0 });
     } catch (error) {
         res.status(500).json({ message: 'Internal server error.', error: error.message, error: 1 });
     }
 };
+

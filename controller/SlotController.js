@@ -1,8 +1,9 @@
 const Slot = require("../models/Slot");
 const moment = require("moment-timezone");
-exports.create_slot = async (req, res) => {
+
+exports.doctorCreateSlot = async (req, res) => {
     const doctorId = req.userId;
-    console.log(doctorId)
+
     const { date, availability, slot_type, block_type, block_at } = req.body;
 
     // Ensure date is in IST and converted to UTC
@@ -115,7 +116,7 @@ exports.create_slot = async (req, res) => {
 
 exports.get_slot = async (req, res) => {
     try {
-        const { date, doctor_id, duration = 30 } = req.query;
+        const { date, doctor_id, duration = 60, upcoming } = req.query;
         const fdata = {};
         if (date) {
             fdata["date"] = moment.tz(date, "Asia/Kolkata").startOf("day").utc().toDate();
@@ -123,6 +124,14 @@ exports.get_slot = async (req, res) => {
         if (doctor_id) {
             fdata["doctor"] = doctor_id;
         }
+        // If upcoming=true, fetch only slots that are booked and start time is in the future
+        if (upcoming) {
+            console.log(fdata)
+            const currentUTC = moment().utc().toDate();
+            fdata["start_time"] = { $gte: currentUTC };
+            fdata["status"] = { $ne: "available" }; // Anything booked
+        }
+
         const slots = await Slot.find(fdata).lean().sort({ start_time: 1 }); // Sort slots by start time
         const formattedSlots = [];
         let i = 0;
@@ -131,6 +140,39 @@ exports.get_slot = async (req, res) => {
             const nextSlot = slots[i + 1];
             const startIST = moment.utc(currentSlot.start_time).tz("Asia/Kolkata");
             const endIST = moment.utc(currentSlot.end_time).tz("Asia/Kolkata");
+
+
+
+            if (upcoming && duration == 30) {
+                formattedSlots.push({
+                    _id: currentSlot._id,
+                    start_time: startIST.format("YYYY-MM-DD HH:mm:ss"),
+                    end_time: endIST.format("YYYY-MM-DD HH:mm:ss"),
+                    status: currentSlot.status
+                });
+                i++;
+                continue;
+            }
+
+            if (upcoming && nextSlot) {
+                const nextStartIST = moment.utc(nextSlot.start_time).tz("Asia/Kolkata");
+
+                // Check if next slot starts immediately after the current slot
+                if (endIST.isSame(nextStartIST)) {
+                    formattedSlots.push({
+                        _id: `${currentSlot._id}-${nextSlot._id}`, // Combine slot IDs
+                        start_time: startIST.format("YYYY-MM-DD HH:mm:ss"),
+                        end_time: moment.utc(nextSlot.end_time).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
+                        status: "booked",
+                        duration: moment(nextSlot.end_time, "YYYY-MM-DD HH:mm:ss").diff(moment(startIST, "YYYY-MM-DD HH:mm:ss"), 'hours')
+                    });
+
+                    i += 2; // Skip next slot since it's merged
+                    continue;
+                }
+            }
+
+
             if (currentSlot.status != "available") {
                 i++;
                 continue;
@@ -166,7 +208,7 @@ exports.get_slot = async (req, res) => {
 
         return res.json({
             success: 1,
-            message: "Available slots fetched successfully",
+            message: upcoming ? "Upcoming bookings fetched successfully" : "Available slots fetched successfully",
             data: formattedSlots
         });
 
@@ -174,7 +216,9 @@ exports.get_slot = async (req, res) => {
         return res.status(500).json({ success: 0, message: "Server error", error: error.message });
     }
 };
-exports.getAllSlots = async (req, res) => {
+
+
+exports.getAllDoctorSlots = async (req, res) => {
     const { date, doctor_id, duration = 30 } = req.query;
     const fdata = {};
     if (date) {
@@ -194,3 +238,5 @@ exports.getAllSlots = async (req, res) => {
     })
     return res.json({ success: 1, message: "List of slots", data: resp });
 }
+
+

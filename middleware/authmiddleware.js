@@ -12,7 +12,12 @@ module.exports = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded._id;
+        req.userId = decoded?._id;
+
+        req.usertype = decoded?.user_type?.title
+
+
+
 
         // ✅ Log the decoded ID
         console.log("Authenticated user ID:", req.userId);
@@ -25,7 +30,7 @@ module.exports = (req, res, next) => {
                 error: error.message,
             })
         }
-        if (error instanceof jwt.JsonWebTokenError || error instanceof TokenError) {
+        if (error instanceof jwt.JsonWebTokenError) {
             return res.status(401).json({
                 message: 'Invalid Token',
                 error: error.message,

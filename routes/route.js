@@ -22,8 +22,9 @@ const { createPetfoodType, getAllPetfoodtypes, getPetfoodtypeById, updatePetfood
 const { CreatePetFood, getAllPetFood, updatePetFood, deletePetFood } = require('../controller/PetFoodController');
 const { createPetActivity, getAllActivity, deletePetActivity, updatePetActivity } = require('../controller/PetActivityController');
 const { create_booking, get_booking } = require('../controller/BookingController');
-const { get_slot, create_slot, getAllSlots } = require('../controller/SlotController');
+const { get_slot, getAllDoctorSlots, doctorCreateSlot } = require('../controller/SlotController');
 const { getAllWishlists, getMyWishlist, getMyDoctorWishlist, deleteWishlist, addToWishlist } = require('../controller/WishlistController');
+const { createSlot, getSlotById, updateSlot, deleteSlot, getAllSlots } = require('../controller/SlotListController');
 
 
 
@@ -193,7 +194,7 @@ router.delete('/delete_shop_category/:id', deleteShopCategory)
 router.post('/product', upload.array('image', 8), createProduct)
 router.get('/product', getAllProducts);
 router.get('/product/:id', getProductById);
-router.put('/update_product/:id', upload.array('images', 10), updateProduct);
+router.put('/update_product/:id', upload.array('image', 10), updateProduct);
 router.delete('/product_delete/soft/:id', softDeleteProduct);
 router.delete("/delete-image/:imageId", deleteProductImage);
 router.delete("/product/:productid/images", clearAllProductImages);
@@ -278,9 +279,21 @@ router.get('/booking', authmiddleware, get_booking);
 // slots
 
 
-router.post('/slot', authmiddleware, create_slot);
-router.get('/slot', get_slot);
-router.get('/slot/all', getAllSlots);
+router.post('/doctorslot', authmiddleware, doctorCreateSlot);
+router.get('/doctorslot', get_slot);
+router.get('/doctorslot/all', getAllDoctorSlots);
+
+
+// slotlist
+router.post('/slots', createSlot);
+// 🔵 Get all Slots
+router.get('/slots', getAllSlots);
+// 🟣 Get a specific Slot by ID
+router.get('/slots/:id', getSlotById);
+// 🟡 Update a Slot by ID
+router.put('/slots/:id', updateSlot);
+// 🔴 Delete a Slot by ID
+router.delete('/slots/:id', deleteSlot);
 
 
 

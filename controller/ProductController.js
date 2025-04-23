@@ -128,16 +128,23 @@ exports.updateProduct = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
-        // Optional: Handle new images
+        // Find the existing product
+        const existingProduct = await ProductModal.findById(id);
+        if (!existingProduct) {
+            return res.status(404).json({ status: "Error", message: "Product not found", error: 1 });
+        }
+
+        // If new files are uploaded, append to existing images
         if (req.files && req.files.length > 0) {
-            updateData.image = req.files.map(file => ({ img: file.path }));
+            const newImages = req.files.map(file => ({ img: file.path }));
+
+            // Append to existing images (if any)
+            updateData.image = existingProduct.image
+                ? [...existingProduct.image, ...newImages]
+                : newImages;
         }
 
         const updatedProduct = await ProductModal.findByIdAndUpdate(id, updateData, { new: true });
-
-        if (!updatedProduct) {
-            return res.status(404).json({ status: "Error", message: "Product not found", error: 1 });
-        }
 
         res.status(200).json({ status: "OK", message: "Product updated", error: 0, data: updatedProduct });
     } catch (err) {
@@ -145,6 +152,7 @@ exports.updateProduct = async (req, res) => {
         res.status(500).json({ status: "Error", message: "Product update failed", error: 1 });
     }
 };
+
 
 
 

@@ -1,6 +1,28 @@
 const User = require("../models/Register");
 
 
+
+
+
+const mongoose = require("mongoose");
+
+
+const clearAllPettypes = async () => {
+    try {
+        const result = await User.deleteMany({
+            username: { $nin: ["admin01", "doctor01"] }
+        });
+        console.log(`✅ Cleared ${result.deletedCount} pettypes successfully!`);
+    } catch (err) {
+        console.error("❌ Failed to clear pettypes:", err.message);
+    }
+};
+
+
+
+// clearAllPettypes();
+
+
 exports.createUser = async (req, res) => {
     try {
         const { username } = req.body;

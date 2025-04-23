@@ -77,10 +77,11 @@ exports.verifyOtp = async (req, res) => {
         }
 
         // ✅ Generate JWT with _id
+        console.log(user)
         const token = jwt.sign(
-            { _id: user._id, phone: user.phone },
+            { _id: user._id, phone: user.phone, user_type: user.user_type },
             process.env.JWT_SECRET,
-            { expiresIn: '7d' }
+            // { expiresIn: '7d' }
         );
 
         res.status(200).json({
