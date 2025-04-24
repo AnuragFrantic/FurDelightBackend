@@ -177,7 +177,6 @@ exports.softDeleteProduct = async (req, res) => {
 exports.deleteProductImage = async (req, res) => {
     try {
         const { imageId } = req.params;
-
         // Find the description containing the image to delete
         const data = await ProductModal.findOneAndUpdate(
             { "image._id": imageId },
