@@ -38,6 +38,7 @@ const schema = new Schema(
             type: String,
         },
 
+
         password: {
             type: String,
         },

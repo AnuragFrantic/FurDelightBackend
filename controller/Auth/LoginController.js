@@ -21,11 +21,19 @@ exports.sendOtp = async (req, res) => {
             return res.status(400).json({ error: 1, message: "Phone number is required!" });
         }
 
+        const normalizedPhone = phone.toString().trim();
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ phone: normalizedPhone });
+        const isOld = !!existingUser;
+
+        // Generate and save OTP
         const otpCode = Math.floor(1000 + Math.random() * 9000);
-        await Otp.deleteOne({ phone });
+
+        await Otp.deleteOne({ phone: normalizedPhone });
 
         const newOtp = new Otp({
-            phone,
+            phone: normalizedPhone,
             otp: otpCode,
             expiresAt: new Date(Date.now() + 30 * 1000) // 30 seconds
         });
@@ -35,26 +43,38 @@ exports.sendOtp = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "OTP sent successfully!",
-            phone,
-            otp: otpCode, // ❗️For testing; remove in production!
+            phone: normalizedPhone,
+            otp: otpCode, // ❗️Remove this in production!
+            isOld,
             error: 0
         });
     } catch (error) {
-        res.status(500).json({ error: 1, message: "Internal Server Error", details: error.message });
+        console.error("sendOtp Error:", error);
+        res.status(500).json({
+            error: 1,
+            message: "Internal Server Error",
+            details: error.message
+        });
     }
 };
 
 
 exports.verifyOtp = async (req, res) => {
     try {
-        const { phone, otp } = req.body;
+        let { phone, otp } = req.body;
+
+        // Convert phone and OTP to string to avoid mismatches
+        phone = phone?.toString().trim();
+        otp = otp?.toString().trim();
+
+        console.log("Incoming Phone:", phone);
+        console.log("Incoming OTP:", otp);
 
         if (!phone || !otp) {
             return res.status(400).json({ error: 1, message: "Phone and OTP are required!" });
         }
 
         const existingOtp = await Otp.findOne({ phone });
-
         if (!existingOtp) {
             return res.status(400).json({ error: 1, message: "OTP expired or not found!" });
         }
@@ -70,30 +90,39 @@ exports.verifyOtp = async (req, res) => {
 
         await Otp.deleteOne({ phone });
 
-        // ✅ Find or create the user
-        let user = await User.findOne({ phone }).populate("user_type");
+        // ✅ Find the user
+        const user = await User.findOne({ phone }).populate("user_type");
+
         if (!user) {
-            user = (await User.create({ phone }));
+            return res.status(404).json({ error: 1, message: "User not found!" });
         }
 
-        // ✅ Generate JWT with _id
-        console.log(user)
+        // ✅ Generate JWT
         const token = jwt.sign(
-            { _id: user._id, phone: user.phone, user_type: user.user_type },
-            process.env.JWT_SECRET,
-            // { expiresIn: '7d' }
+            {
+                _id: user._id,
+                phone: user.phone,
+                user_type: user?.user_type,
+            },
+            process.env.JWT_SECRET
+            // { expiresIn: "7d" }
         );
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "OTP verified successfully!",
             token,
             user,
-            error: 0
+            error: 0,
         });
 
     } catch (error) {
-        res.status(500).json({ error: 1, message: "Internal Server Error", details: error.message });
+        console.error("Verify OTP Error:", error);
+        return res.status(500).json({
+            error: 1,
+            message: "Internal Server Error",
+            details: error.message,
+        });
     }
 };
 
