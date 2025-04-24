@@ -80,7 +80,7 @@ exports.verifyOtp = async (req, res) => {
 
 
         if (!user) {
-            return res.status(404).json({ error: 1, message: "User not found!", isOld: false });
+            return res.status(404).json({ error: 0, message: "User not found!", isOld: false });
         }
 
 
