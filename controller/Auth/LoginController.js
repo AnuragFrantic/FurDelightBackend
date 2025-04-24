@@ -80,23 +80,23 @@ exports.verifyOtp = async (req, res) => {
 
 
         if (!user) {
-            return res.status(404).json({ error: 0, message: "User not found!", isOld: false });
+            return res.status(200).json({ error: 0, message: "User not found!", isOld: false });
         }
 
 
 
         const existingOtp = await Otp.findOne({ phone });
         if (!existingOtp) {
-            return res.status(400).json({ error: 1, message: "OTP expired or not found!" });
+            return res.status(200).json({ error: 1, message: "OTP expired or not found!" });
         }
 
         if (Date.now() > existingOtp.expiresAt) {
             await Otp.deleteOne({ phone });
-            return res.status(400).json({ error: 1, message: "OTP expired!" });
+            return res.status(200).json({ error: 1, message: "OTP expired!" });
         }
 
         if (existingOtp.otp !== otp) {
-            return res.status(400).json({ error: 1, message: "Invalid OTP!" });
+            return res.status(200).json({ error: 1, message: "Invalid OTP!" });
         }
 
         await Otp.deleteOne({ phone });
