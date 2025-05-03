@@ -4,7 +4,7 @@ const schema = new Schema(
         username: {
             type: String,
             unique: true,
-            required: true,
+
             trim: true
         },
         about: {
@@ -30,7 +30,6 @@ const schema = new Schema(
         email: {
             type: String,
             unique: true,
-            required: true,
             lowercase: true,
             trim: true
         },
@@ -51,6 +50,10 @@ const schema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "UserType",
             required: true,
+        },
+        verification: {
+            type: Boolean,
+            default: true,
         },
         roles: [
             {

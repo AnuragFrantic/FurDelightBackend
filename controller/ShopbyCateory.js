@@ -29,12 +29,18 @@ exports.createShop = async (req, res) => {
 
 exports.getAllShopCategory = async (req, res) => {
     try {
-        const filter = { deleted_at: null }
-        const data = await ShopModal.find(filter)
+        const { pet_category } = req.query;
+
+        const filter = { deleted_at: null };
+        if (pet_category) {
+            filter.pet_category = pet_category;
+        }
+
+        const data = await ShopModal.find(filter);
         res.status(200).json({
             success: true,
-            message: "Shop by Category fetch successfully!",
-            data: data,
+            message: "Shop by Category fetched successfully!",
+            data,
             error: 0
         });
     } catch (err) {
@@ -42,11 +48,12 @@ exports.getAllShopCategory = async (req, res) => {
         res.status(500).json({
             success: false,
             error: 1,
-            message: "Failed to create Shop by Category",
-            error: err.message,
+            message: "Failed to fetch Shop by Category",
+            details: err.message,
         });
     }
-}
+};
+
 
 
 exports.updateShopCategory = async (req, res) => {

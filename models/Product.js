@@ -9,6 +9,7 @@ const schema = new Schema({
     title: { type: String, required: true },
     url: { type: String, unique: true },
     image: [ImageSchema],
+    mrp: { type: Number, required: true, default: 0 },
     price: { type: Number, required: true },
     discount_price: { type: Number },
     rating: { type: Number, default: 0 },
@@ -28,6 +29,10 @@ const schema = new Schema({
     // materials: [{ type: String }],
     warranty: { type: String },
     return_policy: { type: String },
+    wishlist: {
+        type: Boolean,
+        default: false
+    },
 
 
     deleted_at: { type: Date },

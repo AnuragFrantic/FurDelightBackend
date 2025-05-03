@@ -1,43 +1,51 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/Usertype');
+const UserModel = require('../models/Register'); // adjust path as needed
 
-
-exports.verifyRoles = () => {
+module.exports = function verifyRoles(requiredPermissions = []) {
     return async (req, res, next) => {
         try {
-            // Extract token from headers
-            const token = req.headers.authorization?.split(' ')[1];
+            const userId = req.userId;
 
-            if (!token) {
-                return res.status(401).json({ message: 'Authorization token is missing', error: 1 });
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized. No user ID found.",
+                    error: 1
+                });
             }
 
-            // Verify token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = decoded;
+            const user = await UserModel.findById(userId);
 
-            // Fetch the user and their roles
-            const user = await User.findById(req.user.id).populate('roles.type');
-
-            if (!user) {
-                return res.status(404).json({ message: 'User not found', error: 1 });
+            if (!user || !Array.isArray(user.roles)) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Access denied. No roles assigned.",
+                    error: 1
+                });
             }
 
-            // Extract all roles' values
-            const roleValues = user.roles.map(role => role.value).flat();
+            // Flatten permissions
+            const userPermissions = user.roles.flatMap(role => role.value);
 
+            const hasPermission = requiredPermissions.every(perm =>
+                userPermissions.includes(perm)
+            );
 
-            const hasAccess = roleValues.some(value => ['Write', 'Update', 'Delete'].includes(value));
-
-            if (!hasAccess) {
-                return res.status(403).json({ message: 'You do not have access to this resource', error: 1 });
+            if (!hasPermission) {
+                return res.status(403).json({
+                    success: false,
+                    message: `You do not have the required permissions: ${requiredPermissions.join(", ")}`,
+                    error: 1
+                });
             }
 
-            // Proceed to the next middleware or controller
             next();
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Internal server error', error: error.message });
+        } catch (err) {
+            console.error("Role verification failed:", err);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error during role verification.",
+                error: err.message
+            });
         }
     };
 };

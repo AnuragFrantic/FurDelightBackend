@@ -21,11 +21,22 @@ exports.sendOtp = async (req, res) => {
             return res.status(400).json({ error: 1, message: "Phone number is required!" });
         }
 
+
+
         const normalizedPhone = phone.toString().trim();
 
         // Check if user already exists
         const existingUser = await User.findOne({ phone: normalizedPhone });
         const isOld = !!existingUser;
+
+
+        // If user exists and verification is false
+        if (existingUser && existingUser.verification === false) {
+            return res.status(403).json({
+                error: 1,
+                message: "Admin will verify your account. Please wait before logging into the doctor app."
+            });
+        }
 
         // Generate and save OTP
         const otpCode = Math.floor(1000 + Math.random() * 9000);
@@ -40,12 +51,20 @@ exports.sendOtp = async (req, res) => {
 
         await newOtp.save();
 
+
+
+
+
+
+
         res.status(200).json({
             success: true,
             message: "OTP sent successfully!",
+
             phone: normalizedPhone,
-            otp: otpCode, // ❗️Remove this in production!
+            otp: otpCode,
             isOld,
+
             error: 0
         });
     } catch (error) {
@@ -61,9 +80,9 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
     try {
-        let { phone, otp } = req.body;
+        let { phone, otp, user_type } = req.body;
 
-        // Convert phone and OTP to string to avoid mismatches
+        // Normalize phone and OTP
         phone = phone?.toString().trim();
         otp = otp?.toString().trim();
 
@@ -74,18 +93,9 @@ exports.verifyOtp = async (req, res) => {
             return res.status(400).json({ error: 1, message: "Phone and OTP are required!" });
         }
 
-
-        const user = await User.findOne({ phone }).populate("user_type");
-
-
-
-        if (!user) {
-            return res.status(200).json({ error: 0, message: "User not found!", isOld: false });
-        }
-
-
-
+        // 🔍 Validate OTP
         const existingOtp = await Otp.findOne({ phone });
+
         if (!existingOtp) {
             return res.status(200).json({ error: 1, message: "OTP expired or not found!" });
         }
@@ -99,20 +109,36 @@ exports.verifyOtp = async (req, res) => {
             return res.status(200).json({ error: 1, message: "Invalid OTP!" });
         }
 
+        // ✅ OTP valid, delete it
         await Otp.deleteOne({ phone });
 
+        // 🔍 Find or create user
+        let user = await User.findOne({ phone }).populate("user_type");
+        let isOld = true;
 
+        if (!user) {
+            try {
+                user = new User({ phone, user_type });
+                await user.save();
+                isOld = false;
+            } catch (saveError) {
+                console.error("Error while creating user:", saveError);
+                return res.status(500).json({
+                    error: 1,
+                    message: "Failed to create user",
+                    details: saveError.message,
+                });
+            }
+        }
 
-        // ✅ Generate JWT
+        // 🔐 Generate JWT token
         const token = jwt.sign(
             {
                 _id: user._id,
                 phone: user.phone,
                 user_type: user?.user_type,
-
             },
             process.env.JWT_SECRET
-            // { expiresIn: "7d" }
         );
 
         return res.status(200).json({
@@ -120,7 +146,7 @@ exports.verifyOtp = async (req, res) => {
             message: "OTP verified successfully!",
             token,
             user,
-            isOld: true,
+            isOld,
             error: 0,
         });
 
@@ -133,6 +159,7 @@ exports.verifyOtp = async (req, res) => {
         });
     }
 };
+
 
 
 

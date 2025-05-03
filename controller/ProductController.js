@@ -1,4 +1,5 @@
 const ProductModal = require('../models/Product')
+const WishlistModal = require("../models/Wishlist")
 
 
 
@@ -26,10 +27,10 @@ exports.createProduct = async (req, res) => {
         await product.save();
 
         // Send success response
-        res.status(201).json({ status: "OK", message: "Product created successfully", error: 0, data: product });
+        res.status(201).json({ success: true, message: "Product created successfully", error: 0, data: product });
     } catch (e) {
         console.error(e); // Log the error for debugging
-        res.status(500).json({ status: "Error", message: "Product not created", error: 1 });
+        res.status(500).json({ success: false, message: "Product not created", error: 1 });
     }
 };
 
@@ -41,10 +42,10 @@ exports.createProduct = async (req, res) => {
 //             .populate("shop_by_category")
 //             .populate("brand");
 
-//         res.status(200).json({ status: "OK", message: "Products fetched", error: 0, data: products });
+//         res.status(200).json({ success : true, message: "Products fetched", error: 0, data: products });
 //     } catch (err) {
 //         console.error(err);
-//         res.status(500).json({ status: "Error", message: "Could not fetch products", error: 1 });
+//         res.status(500).json({ success:false, message: "Could not fetch products", error: 1 });
 //     }
 // };
 
@@ -54,17 +55,22 @@ exports.createProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
     try {
         const {
-            categoryType,
+            category_type,
             brand,
             minPrice,
             maxPrice,
             rating
         } = req.query;
 
+        const userId = req.userId
+
+
+        console.log(userId)
+
         let query = { deleted_at: { $exists: false } };
 
-        if (categoryType) {
-            query.shop_by_category = categoryType;
+        if (category_type) {
+            query.shop_by_category = category_type;
         }
 
         if (brand) {
@@ -87,16 +93,40 @@ exports.getAllProducts = async (req, res) => {
             .populate("shop_by_category")
             .populate("brand");
 
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "User ID is required to check wishlist",
+                error: 1
+            });
+        }
+
+        // Get all product IDs in the user's wishlist
+        const wishlist = await WishlistModal.find({ user: userId }).select("product");
+
+        // Extract the product IDs from the wishlist
+        const wishlistProductIds = wishlist.map(item => item.product.toString());
+
+        // Add a "wishlist" flag to each product in the result
+        const productsWithWishlistFlag = products.map(product => {
+            return {
+                ...product.toObject(),
+                wishlist: wishlistProductIds.includes(product._id.toString())  // Check if product is in wishlist
+            };
+        });
+
+
         res.status(200).json({
-            status: "OK",
+            success: true,
             message: "Products fetched",
             error: 0,
-            data: products
+            data: productsWithWishlistFlag,
         });
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "Error",
+            success: false,
             message: "Could not fetch products",
             error: 1
         });
@@ -109,15 +139,52 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getProductById = async (req, res) => {
     try {
-        const product = await ProductModal.findOne({ _id: req.params.id, deleted_at: { $exists: false } });
+        const productId = req.params.id;
+        const userId = req.query.userId || req.userId; // Use from query or token
+
+        const product = await ProductModal.findOne({ _id: productId, deleted_at: { $exists: false } })
+            .populate("unit")
+            .populate("shop_by_category")
+            .populate("brand");
 
         if (!product) {
-            return res.status(404).json({ status: "Error", message: "Product not found", error: 1 });
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+                error: 1
+            });
         }
 
-        res.status(200).json({ status: "OK", message: "Product fetched", error: 0, data: product });
+        let isWishlisted = false;
+
+        if (userId) {
+            const inWishlist = await WishlistModal.findOne({
+                user: userId,
+                product: productId
+            });
+
+            isWishlisted = !!inWishlist;
+        }
+
+        const productData = {
+            ...product.toObject(),
+            wishlist: isWishlisted
+        };
+
+        res.status(200).json({
+            success: true,
+            message: "Product fetched",
+            error: 0,
+            data: productData
+        });
+
     } catch (err) {
-        res.status(500).json({ status: "Error", message: "Could not fetch product", error: 1 });
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: "Could not fetch product",
+            error: 1
+        });
     }
 };
 
@@ -131,7 +198,7 @@ exports.updateProduct = async (req, res) => {
         // Find the existing product
         const existingProduct = await ProductModal.findById(id);
         if (!existingProduct) {
-            return res.status(404).json({ status: "Error", message: "Product not found", error: 1 });
+            return res.status(404).json({ success: false, message: "Product not found", error: 1 });
         }
 
         // If new files are uploaded, append to existing images
@@ -146,10 +213,10 @@ exports.updateProduct = async (req, res) => {
 
         const updatedProduct = await ProductModal.findByIdAndUpdate(id, updateData, { new: true });
 
-        res.status(200).json({ status: "OK", message: "Product updated", error: 0, data: updatedProduct });
+        res.status(200).json({ success: true, message: "Product updated", error: 0, data: updatedProduct });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "Error", message: "Product update failed", error: 1 });
+        res.status(500).json({ success: false, message: "Product update failed", error: 1 });
     }
 };
 
@@ -163,12 +230,12 @@ exports.softDeleteProduct = async (req, res) => {
         const deletedProduct = await ProductModal.findByIdAndUpdate(id, { deleted_at: new Date() }, { new: true });
 
         if (!deletedProduct) {
-            return res.status(404).json({ status: "Error", message: "Product not found", error: 1 });
+            return res.status(404).json({ success: false, message: "Product not found", error: 1 });
         }
 
-        res.status(200).json({ status: "OK", message: "Product soft-deleted", error: 0, data: deletedProduct });
+        res.status(200).json({ success: true, message: "Product soft-deleted", error: 0, data: deletedProduct });
     } catch (err) {
-        res.status(500).json({ status: "Error", message: "Soft delete failed", error: 1 });
+        res.status(500).json({ success: false, message: "Soft delete failed", error: 1 });
     }
 };
 

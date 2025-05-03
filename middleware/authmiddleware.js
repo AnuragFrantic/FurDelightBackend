@@ -20,7 +20,7 @@ module.exports = (req, res, next) => {
 
 
         // ✅ Log the decoded ID
-        console.log("Authenticated user ID:", req.userId);
+        // console.log("Authenticated user ID:", req.userId);
 
         next();
     } catch (error) {

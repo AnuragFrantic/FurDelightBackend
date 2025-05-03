@@ -25,10 +25,10 @@ exports.createevents = async (req, res) => {
         await event.save();
 
         // Send success response
-        res.status(201).json({ status: "OK", message: "Event created successfully", error: 0, data: event });
+        res.status(201).json({ success: true, message: "Event created successfully", error: 0, data: event });
     } catch (e) {
         console.error(e); // Log the error for debugging
-        res.status(500).json({ status: "Error", message: "Event not created", error: 1 });
+        res.status(500).json({ success: false, message: "Event not created", error: 1 });
     }
 };
 
@@ -38,10 +38,10 @@ exports.getAllEvents = async (req, res) => {
         const Events = await PetEventModal.find({ deleted_at: { $exists: false } })
 
 
-        res.status(200).json({ status: "OK", message: "Events fetched", error: 0, data: Events });
+        res.status(200).json({ success: true, message: "Events fetched", error: 0, data: Events });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "Error", message: "Could not fetch Events", error: 1 });
+        res.status(500).json({ success: false, message: "Could not fetch Events", error: 1 });
     }
 };
 
@@ -52,12 +52,12 @@ exports.getEventsById = async (req, res) => {
         const event = await PetEventModal.findOne({ _id: req.params.id, deleted_at: { $exists: false } });
 
         if (!event) {
-            return res.status(404).json({ status: "Error", message: "event not found", error: 1 });
+            return res.status(404).json({ success: false, message: "event not found", error: 1 });
         }
 
-        res.status(200).json({ status: "OK", message: "event fetched", error: 0, data: event });
+        res.status(200).json({ success: true, message: "event fetched", error: 0, data: event });
     } catch (err) {
-        res.status(500).json({ status: "Error", message: "Could not fetch event", error: 1 });
+        res.status(500).json({ success: false, message: "Could not fetch event", error: 1 });
     }
 };
 
@@ -76,13 +76,13 @@ exports.updateEvents = async (req, res) => {
         const updatedProduct = await PetEventModal.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!updatedProduct) {
-            return res.status(404).json({ status: "Error", message: "Event not found", error: 1 });
+            return res.status(404).json({ success: false, message: "Event not found", error: 1 });
         }
 
-        res.status(200).json({ status: "OK", message: "Event updated", error: 0, data: updatedProduct });
+        res.status(200).json({ success: true, message: "Event updated", error: 0, data: updatedProduct });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "Error", message: "Event update failed", error: 1 });
+        res.status(500).json({ success: false, message: "Event update failed", error: 1 });
     }
 };
 
@@ -95,11 +95,35 @@ exports.softDeleteEvents = async (req, res) => {
         const deleteEvent = await PetEventModal.findByIdAndUpdate(id, { deleted_at: new Date() }, { new: true });
 
         if (!deleteEvent) {
-            return res.status(404).json({ status: "Error", message: "Event not found", error: 1 });
+            return res.status(404).json({ success: false, message: "Event not found", error: 1 });
         }
 
-        res.status(200).json({ status: "OK", message: "Event soft-deleted", error: 0, data: deleteEvent });
+        res.status(200).json({ success: true, message: "Event soft-deleted", error: 0, data: deleteEvent });
     } catch (err) {
-        res.status(500).json({ status: "Error", message: "Soft delete failed", error: 1 });
+        res.status(500).json({ success: false, message: "Soft delete failed", error: 1 });
+    }
+};
+
+
+exports.deleteEventsImage = async (req, res) => {
+    try {
+        const { imageId } = req.params;
+        // Find the description containing the image to delete
+        const data = await PetEventModal.findOneAndUpdate(
+            { "image._id": imageId },
+            { $pull: { image: { _id: imageId } } },
+            { new: true }
+        );
+
+
+
+        if (!data) {
+            return res.status(500).json({ message: "data not found" });
+        }
+
+        // Image successfully deleted
+        res.status(200).json({ message: "Image deleted successfully", data: data, error: 0 });
+    } catch (error) {
+        res.status(500).json({ message: error.message, error: 1 });
     }
 };

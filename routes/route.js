@@ -2,7 +2,7 @@ const express = require('express');
 const { createUserType, getAllUserTypes, getUserTypeById, updateUserType, deleteUserType } = require('../controller/UserTypeController');
 const { verifyRoles } = require('../middleware/verifyroles');
 const upload = require('../middleware/multerconfig');
-const { createUser, getAllUsers, getUserById, updateUser, deleteUser } = require('../controller/UserController');
+const { createUser, getAllUsers, getUserById, updateUser, deleteUser, getProfile } = require('../controller/UserController');
 const { sendOtp, verifyOtp, getAllOtp, loginWithEmailPassword } = require('../controller/Auth/LoginController');
 const { createSplashScreen, updateSplashScreen, getAllSplash, deleteSplash } = require('../controller/SplashController');
 const { createBanner, getallbanner, updatebanner, deleteBanner } = require('../controller/BannerController');
@@ -16,7 +16,7 @@ const { createPetEssential, getAllPetEssentials, getPetEssentialById, updatePetE
 const { CreateCategory, getAllCategory, updateCategory, deleteCategory } = require('../controller/Categories');
 const { createShop, getAllShopCategory, updateShopCategory, deleteShopCategory } = require('../controller/ShopbyCateory');
 const { createProduct, getAllProducts, getProductById, updateProduct, softDeleteProduct, deleteProductImage, clearAllProductImages } = require('../controller/ProductController');
-const { createevents, getAllEvents, getEventsById, updateEvents, softDeleteEvents } = require('../controller/PetEvents');
+const { createevents, getAllEvents, getEventsById, updateEvents, softDeleteEvents, deleteEventsImage } = require('../controller/PetEvents');
 const { createUnit, getAllUnits, getUnitById, updateUnit, softDeleteUnit } = require('../controller/UnitController');
 const { createPetfoodType, getAllPetfoodtypes, getPetfoodtypeById, updatePetfoodtype, deletePetfoodtype } = require('../controller/PetFoodType');
 const { CreatePetFood, getAllPetFood, updatePetFood, deletePetFood } = require('../controller/PetFoodController');
@@ -25,6 +25,9 @@ const { create_booking, get_booking } = require('../controller/BookingController
 const { get_slot, getAllDoctorSlots, doctorCreateSlot } = require('../controller/SlotController');
 const { getAllWishlists, getMyWishlist, getMyDoctorWishlist, deleteWishlist, addToWishlist } = require('../controller/WishlistController');
 const { createSlot, getSlotById, updateSlot, deleteSlot, getAllSlots } = require('../controller/SlotListController');
+const { createModule, getAllModules, getModuleById, updateModule, deleteModule } = require('../controller/PermissionController/ModulesController');
+const { createPermission, getAllPermissions, getPermissionById, updatePermission, deletePermission } = require('../controller/PermissionController/DefaultPermissionController');
+const verifyroles = require('../middleware/verifyroles');
 
 
 
@@ -56,7 +59,9 @@ router.put('/user_type/:id', updateUserType);
 
 router.post("/create_user", uploadFields, createUser);
 router.get("/users", getAllUsers);
-router.get("/profile", authMiddleware, getUserById);
+router.get("/profile", authMiddleware, getProfile);
+router.get("/single_user/:id", getUserById);
+
 router.put("/user_update/:id", uploadFields, updateUser);
 router.delete("/delete_user/:id", deleteUser);
 
@@ -69,7 +74,9 @@ router.post("/login", loginWithEmailPassword);
 
 // splash api 
 
-router.get('/splash', getAllSplash)
+router.get('/splash', authmiddleware, verifyroles(["Read"]), getAllSplash)
+
+
 router.post('/splash', upload.single('image'), createSplashScreen)
 router.put("/splash/:id", upload.single("image"), updateSplashScreen);
 router.delete('/delete_splash/:id', deleteSplash)
@@ -78,7 +85,7 @@ router.delete('/delete_splash/:id', deleteSplash)
 // banner
 
 router.post('/create_banner', upload.single('image'), createBanner)
-router.get('/banner', getallbanner)
+router.get('/banner', authmiddleware, verifyroles(["Read"]), getallbanner)
 router.put('/banner_update/:id', upload.single('image'), updatebanner)
 router.delete('/banner_delete/:id', deleteBanner)
 
@@ -192,8 +199,8 @@ router.delete('/delete_shop_category/:id', deleteShopCategory)
 // product 
 
 router.post('/product', upload.array('image', 8), createProduct)
-router.get('/product', getAllProducts);
-router.get('/product/:id', getProductById);
+router.get('/product', authMiddleware, getAllProducts);
+router.get('/product/:id', authMiddleware, getProductById);
 router.put('/update_product/:id', upload.array('image', 10), updateProduct);
 router.delete('/product_delete/soft/:id', softDeleteProduct);
 router.delete("/delete-image/:imageId", deleteProductImage);
@@ -206,6 +213,8 @@ router.get('/events', getAllEvents);
 router.get('/events/:id', getEventsById);
 router.put('/update_events/:id', upload.array('images', 10), updateEvents);
 router.delete('/delete_events/:id', softDeleteEvents);
+router.delete("/delete-eventimage/:imageId", deleteEventsImage);
+
 
 
 // unit
@@ -264,17 +273,9 @@ router.put('/updatepet_activity/:id', upload.single("image"), updatePetActivity)
 router.get('/pet_activity', getAllActivity)
 router.delete('/pet_activity/:id', deletePetActivity)
 
-
-
 // Booking
-
 router.post('/booking', authmiddleware, create_booking);
 router.get('/booking', authmiddleware, get_booking);
-
-
-
-
-
 
 // slots
 
@@ -309,5 +310,35 @@ router.delete('/wishlist/delete', authmiddleware, deleteWishlist);
 
 
 
+//module
+
+router.post('/module', upload.single('image'), createModule);
+router.get('/module', getAllModules);
+router.get('/module/:id', getModuleById);
+
+router.put('/module/:id', upload.single('image'), updateModule);
+
+router.delete('/delete-module/:id', deleteModule);
+
+
+//default- permission
+
+router.post('/default-permission', createPermission);
+router.get('/default-permission', getAllPermissions);
+
+router.get('/default-permission/:id', getPermissionById);
+
+router.put('/default-permission/:id', updatePermission);
+
+router.delete('/delete_default-permission/:id', deletePermission);
+
+
+
+
 
 module.exports = router;
+
+
+
+
+
