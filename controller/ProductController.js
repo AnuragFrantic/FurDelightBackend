@@ -106,13 +106,13 @@ exports.getAllProducts = async (req, res) => {
         const wishlist = await WishlistModal.find({ user: userId }).select("product");
 
         // Extract the product IDs from the wishlist
-        const wishlistProductIds = wishlist.map(item => item.product.toString());
+        const wishlistProductIds = wishlist.map(item => item.product?.toString());
 
         // Add a "wishlist" flag to each product in the result
         const productsWithWishlistFlag = products.map(product => {
             return {
                 ...product.toObject(),
-                wishlist: wishlistProductIds.includes(product._id.toString())  // Check if product is in wishlist
+                wishlist: wishlistProductIds.includes(product._id?.toString())  // Check if product is in wishlist
             };
         });
 
