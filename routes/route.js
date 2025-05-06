@@ -30,6 +30,11 @@ const { createPermission, getAllPermissions, getPermissionById, updatePermission
 const verifyroles = require('../middleware/verifyroles');
 
 
+const readAccess = verifyroles(["Read"]);
+const writeAccess = verifyroles(["Write"]);
+const updateAccess = verifyroles(["Update"]);
+const deleteAccess = verifyroles(["Delete"]);
+const fullAccessMiddleware = verifyroles(["Read", "Write", "Update", "Delete"]);
 
 
 const router = express.Router();
@@ -40,6 +45,9 @@ const uploadFields = upload.fields([
     { name: "post_graduation_certificate", maxCount: 1 },
     { name: "mci_certificate", maxCount: 1 }
 ]);
+
+
+
 
 // userType api
 
@@ -74,26 +82,26 @@ router.post("/login", loginWithEmailPassword);
 
 // splash api 
 
-router.get('/splash', authmiddleware, verifyroles(["Read"]), getAllSplash)
+router.get('/splash', authmiddleware, readAccess, getAllSplash)
 
 
-router.post('/splash', upload.single('image'), createSplashScreen)
-router.put("/splash/:id", upload.single("image"), updateSplashScreen);
-router.delete('/delete_splash/:id', deleteSplash)
+router.post('/splash', upload.single('image'), writeAccess, createSplashScreen)
+router.put("/splash/:id", upload.single("image"), updateAccess, updateSplashScreen);
+router.delete('/delete_splash/:id', deleteAccess, deleteSplash)
 
 
 // banner
 
-router.post('/create_banner', upload.single('image'), createBanner)
-router.get('/banner', authmiddleware, verifyroles(["Read"]), getallbanner)
-router.put('/banner_update/:id', upload.single('image'), updatebanner)
-router.delete('/banner_delete/:id', deleteBanner)
+router.post('/create_banner', upload.single('image'), writeAccess, createBanner)
+router.get('/banner', authmiddleware, readAccess, getallbanner)
+router.put('/banner_update/:id', upload.single('image'), updateAccess, updatebanner)
+router.delete('/banner_delete/:id', deleteAccess, deleteBanner)
 
 
 // brand
-router.get('/brand', getallBrand)
-router.post('/brand', upload.single('image'), createBrand)
-router.put('/update_brand/:id', updateBrand)
+router.get('/brand', readAccess, getallBrand)
+router.post('/brand', upload.single('image'), writeAccess, createBrand)
+router.put('/update_brand/:id', updateAccess, updateBrand)
 router.delete('/delete_brand/:id', deleteBrand)
 
 

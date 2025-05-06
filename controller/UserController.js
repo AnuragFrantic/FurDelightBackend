@@ -112,7 +112,7 @@ exports.createUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find().select('-roles');
         res.status(200).json({ success: true, data: users, error: 0 });
     } catch (error) {
         res.status(500).json({ error: 1, message: "Internal Server Error", details: error.message, });
@@ -147,7 +147,7 @@ exports.getProfile = async (req, res) => {
 exports.getUserById = async (req, res) => {
     try {
         const userId = req.params.id;
-        console.log(userId)
+
 
         if (!userId) {
             return res.status(400).json({
@@ -157,7 +157,7 @@ exports.getUserById = async (req, res) => {
             });
         }
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("user_type roles.type");
 
         if (!user) {
             return res.status(404).json({
