@@ -17,6 +17,7 @@ const CartSchema = new mongoose.Schema({
         default: 1,
         min: 1,
     },
+    getwa
 
 }, { timestamps: true });
 

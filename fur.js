@@ -7,6 +7,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
 const cors = require("cors")
+const path = require('path');
 
 const mainroutes = require('./routes/route')
 
@@ -39,6 +40,9 @@ app.get('/', (req, res) => {
 app.use(cors())
 app.use(express.json());
 app.use(mainroutes)
+
+
+
 
 
 

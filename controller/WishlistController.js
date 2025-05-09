@@ -1,4 +1,5 @@
 const Wishlist = require('../models/Wishlist');
+const Product = require('../models/Product');
 
 
 exports.addToWishlist = async (req, res) => {
@@ -29,8 +30,13 @@ exports.addToWishlist = async (req, res) => {
 
             });
 
+
+
             await wishlist.save();
-            return res.status(201).json({ message: 'Wishlist created and item added.', wishlist });
+
+
+
+            return res.status(201).json({ message: 'Wishlist created and item added.', wishlist, error: 0 });
         }
 
         // Check if item already exists
@@ -59,7 +65,7 @@ exports.addToWishlist = async (req, res) => {
             wishlist.updated_by = userId;
             await wishlist.save();
 
-            return res.status(200).json({ message: 'Item removed from wishlist.', wishlist });
+            return res.status(200).json({ message: 'Item removed from wishlist.', wishlist, error: 0 });
         }
 
 
@@ -81,11 +87,11 @@ exports.addToWishlist = async (req, res) => {
         wishlist.updated_by = userId;
         await wishlist.save();
 
-        return res.status(200).json({ message: 'Item added to wishlist.', wishlist });
+        return res.status(200).json({ message: 'Item added to wishlist.', wishlist, error: 0 });
 
     } catch (error) {
         console.error('Error adding to wishlist:', error);
-        res.status(500).json({ message: 'Server error', error });
+        res.status(500).json({ message: 'Server error', error, error: 1 });
     }
 };
 
@@ -99,9 +105,9 @@ exports.getAllWishlists = async (req, res) => {
             .populate('user')
             .populate('items.item');
 
-        res.status(200).json(wishlists);
+        res.status(200).json({ data: wishlists, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error fetching wishlists', error: err.message });
+        res.status(500).json({ message: 'Error fetching wishlists', error: err.message, error: 1 });
     }
 };
 
@@ -114,12 +120,12 @@ exports.getMyWishlist = async (req, res) => {
             .populate('items.item');
 
         if (!wishlist) {
-            return res.status(404).json({ message: 'No wishlist found' });
+            return res.status(404).json({ message: 'No wishlist found', error: 1 });
         }
 
-        res.status(200).json(wishlist);
+        res.status(200).json({ data: wishlist, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error fetching wishlist', error: err.message });
+        res.status(500).json({ message: 'Error fetching wishlist', error: err.message, error: 0 });
     }
 };
 
@@ -131,13 +137,13 @@ exports.getMyDoctorWishlist = async (req, res) => {
         const wishlist = await Wishlist.findOne({ user: userId, is_deleted: false });
 
         if (!wishlist) {
-            return res.status(404).json({ message: 'No wishlist found' });
+            return res.status(404).json({ message: 'No wishlist found', error: 1 });
         }
 
         const doctorItems = wishlist.items.filter(i => i.item_type === 'User');
-        res.status(200).json(doctorItems);
+        res.status(200).json({ data: doctorItems, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error fetching doctor wishlist', error: err.message });
+        res.status(500).json({ message: 'Error fetching doctor wishlist', error: err.message, error: 1 });
     }
 };
 
@@ -153,11 +159,11 @@ exports.deleteWishlist = async (req, res) => {
         );
 
         if (!wishlist) {
-            return res.status(404).json({ message: 'No wishlist found' });
+            return res.status(404).json({ message: 'No wishlist found', error: 1 });
         }
 
-        res.status(200).json({ message: 'Wishlist deleted successfully', wishlist });
+        res.status(200).json({ message: 'Wishlist deleted successfully', wishlist, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error deleting wishlist', error: err.message });
+        res.status(500).json({ message: 'Error deleting wishlist', error: err.message, error: 1 });
     }
 };

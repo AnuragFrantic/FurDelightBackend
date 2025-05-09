@@ -20,9 +20,6 @@ exports.sendOtp = async (req, res) => {
         if (!phone) {
             return res.status(400).json({ error: 1, message: "Phone number is required!" });
         }
-
-
-
         const normalizedPhone = phone.toString().trim();
 
         // Check if user already exists
@@ -30,7 +27,7 @@ exports.sendOtp = async (req, res) => {
         const isOld = !!existingUser;
 
 
-        // If user exists and verification is false
+
         if (existingUser && existingUser.verification === false) {
             return res.status(403).json({
                 error: 1,
@@ -93,6 +90,8 @@ exports.verifyOtp = async (req, res) => {
             return res.status(400).json({ error: 1, message: "Phone and OTP are required!" });
         }
 
+
+
         // 🔍 Validate OTP
         const existingOtp = await Otp.findOne({ phone });
 
@@ -116,7 +115,14 @@ exports.verifyOtp = async (req, res) => {
         let user = await User.findOne({ phone }).populate("user_type");
         let isOld = true;
 
+        if (user && user.deleted_at) {
+            user = null; // Ignore old user
+        }
+
+
+
         if (!user) {
+
             try {
                 user = new User({ phone, user_type });
                 await user.save();

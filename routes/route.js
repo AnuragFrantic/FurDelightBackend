@@ -1,6 +1,6 @@
 const express = require('express');
 const { createUserType, getAllUserTypes, getUserTypeById, updateUserType, deleteUserType } = require('../controller/UserTypeController');
-const { verifyRoles } = require('../middleware/verifyroles');
+
 const upload = require('../middleware/multerconfig');
 const { createUser, getAllUsers, getUserById, updateUser, deleteUser, getProfile } = require('../controller/UserController');
 const { sendOtp, verifyOtp, getAllOtp, loginWithEmailPassword } = require('../controller/Auth/LoginController');
@@ -10,7 +10,7 @@ const { getallBrand, createBrand, deleteBrand, updateBrand } = require('../contr
 const authMiddleware = require('../middleware/authmiddleware');
 const { createPettype, updatePettype, getAllPettypes, getPettypeById, deletePettype } = require('../controller/PetTypeController');
 const { createPetBreed, getAllPetBreeds, getPetBreedById, updatePetBreed, deletePetBreed } = require('../controller/PetBreedController');
-const authmiddleware = require('../middleware/authmiddleware');
+
 const { createPet, getAllPets, getPetById, updatePet, deletePet, getMyPets } = require('../controller/PetController');
 const { createPetEssential, getAllPetEssentials, getPetEssentialById, updatePetEssential, deletePetEssential } = require('../controller/PetEssentialController');
 const { CreateCategory, getAllCategory, updateCategory, deleteCategory } = require('../controller/Categories');
@@ -27,14 +27,13 @@ const { getAllWishlists, getMyWishlist, getMyDoctorWishlist, deleteWishlist, add
 const { createSlot, getSlotById, updateSlot, deleteSlot, getAllSlots } = require('../controller/SlotListController');
 const { createModule, getAllModules, getModuleById, updateModule, deleteModule } = require('../controller/PermissionController/ModulesController');
 const { createPermission, getAllPermissions, getPermissionById, updatePermission, deletePermission } = require('../controller/PermissionController/DefaultPermissionController');
-const verifyroles = require('../middleware/verifyroles');
+
+const { createProductVariant, getAllProductVariants, getProductVariantById, updateProductVariant, deleteProductVariant, deleteProductVariantImage } = require('../controller/ProductVariant');
+const auth = require('../middleware/auth');
+const authmiddleware = require('../middleware/authmiddleware');
 
 
-const readAccess = verifyroles(["Read"]);
-const writeAccess = verifyroles(["Write"]);
-const updateAccess = verifyroles(["Update"]);
-const deleteAccess = verifyroles(["Delete"]);
-const fullAccessMiddleware = verifyroles(["Read", "Write", "Update", "Delete"]);
+
 
 
 const router = express.Router();
@@ -56,10 +55,10 @@ const uploadFields = upload.fields([
 
 
 
-router.post('/user_type', createUserType);
-router.get('/user_type', authMiddleware, getAllUserTypes);
-router.get('/user_type/:id', getUserTypeById);
-router.put('/user_type/:id', updateUserType);
+router.post('/user_type', auth("usertype", "Create"), createUserType);
+router.get('/user_type', auth("usertype", "Read"), getAllUserTypes);
+router.get('/user_type/:id', auth("usertype", "Read"), getUserTypeById);
+router.put('/user_type/:id', auth("usertype", "Delete"), updateUserType);
 
 // router.delete('/user_type/:id', deleteUserType);
 
@@ -67,7 +66,7 @@ router.put('/user_type/:id', updateUserType);
 
 router.post("/create_user", uploadFields, createUser);
 router.get("/users", getAllUsers);
-router.get("/profile", authMiddleware, getProfile);
+router.get("/profile", auth("user", "Read"), getProfile);
 router.get("/single_user/:id", getUserById);
 
 router.put("/user_update/:id", uploadFields, updateUser);
@@ -82,26 +81,24 @@ router.post("/login", loginWithEmailPassword);
 
 // splash api 
 
-router.get('/splash', authmiddleware, readAccess, getAllSplash)
-
-
-router.post('/splash', upload.single('image'), writeAccess, createSplashScreen)
-router.put("/splash/:id", upload.single("image"), updateAccess, updateSplashScreen);
-router.delete('/delete_splash/:id', deleteAccess, deleteSplash)
+router.get('/splash', auth("splash", "Read"), getAllSplash)
+router.post('/splash', upload.single('image'), createSplashScreen)
+router.put("/splash/:id", upload.single("image"), updateSplashScreen);
+router.delete('/delete_splash/:id', deleteSplash)
 
 
 // banner
 
-router.post('/create_banner', upload.single('image'), writeAccess, createBanner)
-router.get('/banner', authmiddleware, readAccess, getallbanner)
-router.put('/banner_update/:id', upload.single('image'), updateAccess, updatebanner)
-router.delete('/banner_delete/:id', deleteAccess, deleteBanner)
+router.post('/create_banner', upload.single('image'), createBanner)
+router.get('/banner', auth('banner', 'Read'), getallbanner)
+router.put('/banner_update/:id', upload.single('image'), updatebanner)
+router.delete('/banner_delete/:id', deleteBanner)
 
 
 // brand
-router.get('/brand', readAccess, getallBrand)
-router.post('/brand', upload.single('image'), writeAccess, createBrand)
-router.put('/update_brand/:id', updateAccess, updateBrand)
+router.get('/brand', getallBrand)
+router.post('/brand', upload.single('image'), createBrand)
+router.put('/update_brand/:id', updateBrand)
 router.delete('/delete_brand/:id', deleteBrand)
 
 
@@ -111,13 +108,13 @@ router.delete('/delete_brand/:id', deleteBrand)
 
 router.post(
     "/pet_type",
-    authmiddleware,
+    auth("pettype", "Read"),
     upload.single("image"),
     createPettype
 );
 
 // Get all Pettypes
-router.get("/pet_type", getAllPettypes);
+router.get("/pet_type", auth("pettype", "Read"), getAllPettypes);
 
 // Get Pettype by ID
 router.get("/pet_type/:id", getPettypeById);
@@ -125,7 +122,7 @@ router.get("/pet_type/:id", getPettypeById);
 // Update Pettype (with optional image)
 router.put(
     "/pet_type_update/:id",
-    authmiddleware,
+    auth("pettype", "Update"),
     upload.single("image"),
     updatePettype
 );
@@ -140,7 +137,7 @@ router.delete("/pet_type_delete/:id", deletePettype);
 // Create
 router.post(
     "/pet_breeds",
-    authmiddleware,
+    auth("petbreed", "Create"),
     upload.single("image"),
     createPetBreed
 );
@@ -154,7 +151,7 @@ router.get("/pet_breeds/:id", getPetBreedById);
 // Update
 router.put(
     "/pet_breeds/:id",
-    authmiddleware,
+    auth("petbreed", "Update"),
     upload.single("image"),
     updatePetBreed
 );
@@ -162,7 +159,7 @@ router.put(
 // Soft delete
 router.delete(
     "/pet_breeds/:id",
-    authmiddleware,
+    auth("petbreed", "Delete"),
     deletePetBreed
 );
 
@@ -170,11 +167,11 @@ router.delete(
 
 
 // pet 
-router.post('/pet', authmiddleware, upload.single('image'), createPet);
+router.post('/pet', auth("pet", "Create"), upload.single('image'), createPet);
 router.get('/pet', getAllPets);
 router.get('/pet/:id', getPetById);
-router.put('/pet/:id', authmiddleware, upload.single('image'), updatePet);
-router.get("/my-pets", authmiddleware, getMyPets);
+router.put('/pet/:id', auth("pet", "Update"), upload.single('image'), updatePet);
+router.get("/my-pets", auth("pet", "Read"), getMyPets);
 router.delete('/pet/:id', deletePet);
 
 // pet Essential
@@ -207,12 +204,24 @@ router.delete('/delete_shop_category/:id', deleteShopCategory)
 // product 
 
 router.post('/product', upload.array('image', 8), createProduct)
-router.get('/product', authMiddleware, getAllProducts);
-router.get('/product/:id', authMiddleware, getProductById);
+router.get('/product', auth("product", "Read"), getAllProducts);
+router.get('/product/:id', auth("product", "Read"), getProductById);
 router.put('/update_product/:id', upload.array('image', 10), updateProduct);
 router.delete('/product_delete/soft/:id', softDeleteProduct);
 router.delete("/delete-image/:imageId", deleteProductImage);
 router.delete("/product/:productid/images", clearAllProductImages);
+
+
+
+// prouctvariant
+
+router.post('/product_variant', upload.array('image', 8), createProductVariant);
+router.get('/product_variant', getAllProductVariants);
+router.get('/product_variant/:id', getProductVariantById);
+router.put('/product_variant/:id', updateProductVariant);
+router.delete('/delete_product_variant/:id', deleteProductVariant);
+router.delete("/delete-variantimage/:imageId", deleteProductVariantImage);
+
 
 // events
 
@@ -240,7 +249,7 @@ router.delete("/delete_unit/:id", softDeleteUnit);
 
 router.post(
     "/petfood_type",
-    authmiddleware,
+    auth("petfoodtype", "Create"),
     createPetfoodType
 );
 
@@ -253,7 +262,7 @@ router.get("/petfood_type/:id", getPetfoodtypeById);
 // Update Pettype (with optional image)
 router.put(
     "/petfood_type_update/:id",
-    authmiddleware,
+    auth("petfoodtype", "Update"),
 
     updatePetfoodtype
 );
@@ -282,13 +291,13 @@ router.get('/pet_activity', getAllActivity)
 router.delete('/pet_activity/:id', deletePetActivity)
 
 // Booking
-router.post('/booking', authmiddleware, create_booking);
-router.get('/booking', authmiddleware, get_booking);
+router.post('/booking', auth("booking", "Create"), create_booking);
+router.get('/booking', auth("booking", "Read"), get_booking);
 
 // slots
 
 
-router.post('/doctorslot', authmiddleware, doctorCreateSlot);
+router.post('/doctorslot', auth("slot", "Create"), doctorCreateSlot);
 router.get('/doctorslot', get_slot);
 router.get('/doctorslot/all', getAllDoctorSlots);
 
@@ -309,11 +318,11 @@ router.delete('/slots/:id', deleteSlot);
 // wishlist
 
 
-router.post('/wishlist', authmiddleware, addToWishlist);
-router.get('/wishlist', getAllWishlists); // admin
-router.get('/my_wishlist', authmiddleware, getMyWishlist);
-router.get('/wishlist/doctors', authmiddleware, getMyDoctorWishlist);
-router.delete('/wishlist/delete', authmiddleware, deleteWishlist);
+router.post('/wishlist', auth("wishlist", "Create"), addToWishlist);
+router.get('/wishlist', getAllWishlists);
+router.get('/my_wishlist', auth("wishlist", "Read"), getMyWishlist);
+router.get('/wishlist/doctors', auth("wishlist", "Read"), getMyDoctorWishlist);
+router.delete('/wishlist/delete', auth("wishlist", "Delete"), deleteWishlist);
 
 
 

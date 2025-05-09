@@ -55,6 +55,7 @@ exports.createProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
     try {
         const {
+            shop_category,
             category_type,
             brand,
             minPrice,
@@ -70,7 +71,7 @@ exports.getAllProducts = async (req, res) => {
         let query = { deleted_at: { $exists: false } };
 
         if (category_type) {
-            query.shop_by_category = category_type;
+            query.shop_by_category = shop_category;
         }
 
         if (brand) {
@@ -103,25 +104,37 @@ exports.getAllProducts = async (req, res) => {
         }
 
         // Get all product IDs in the user's wishlist
-        const wishlist = await WishlistModal.find({ user: userId }).select("product");
+        const wishlist = await WishlistModal.findOne({ user: userId }).select("items");
 
-        // Extract the product IDs from the wishlist
-        const wishlistProductIds = wishlist.map(item => item.product?.toString());
+        // Extract only Product-type item IDs from wishlist
+        const wishlistProductIds = wishlist
+            ? wishlist.items
+                .filter(i => i.item_type === 'Product')
+                .map(i => i.item.toString())
+            : [];
 
         // Add a "wishlist" flag to each product in the result
         const productsWithWishlistFlag = products.map(product => {
             return {
                 ...product.toObject(),
-                wishlist: wishlistProductIds.includes(product._id?.toString())  // Check if product is in wishlist
+                wishlist: wishlistProductIds.includes(product._id.toString())
             };
         });
+
+        const filteredProducts = productsWithWishlistFlag.filter(product => {
+            if (category_type && product.shop_by_category) {
+                return product.shop_by_category.pet_category.toString() === category_type;
+            }
+            return true;
+        });
+
 
 
         res.status(200).json({
             success: true,
             message: "Products fetched",
             error: 0,
-            data: productsWithWishlistFlag,
+            data: filteredProducts,
         });
     } catch (err) {
         console.error(err);
