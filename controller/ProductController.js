@@ -90,7 +90,7 @@ exports.getAllProducts = async (req, res) => {
         }
 
         const products = await ProductModal.find(query)
-            .populate("unit")
+
             .populate("shop_by_category")
             .populate("brand");
 
@@ -156,7 +156,7 @@ exports.getProductById = async (req, res) => {
         const userId = req.query.userId || req.userId; // Use from query or token
 
         const product = await ProductModal.findOne({ _id: productId, deleted_at: { $exists: false } })
-            .populate("unit")
+
             .populate("shop_by_category")
             .populate("brand");
 
