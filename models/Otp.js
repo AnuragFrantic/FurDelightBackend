@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 
 const otpSchema = new mongoose.Schema({
+
     phone: {
         type: String,
-        required: true,
-        unique: true
+
     },
     otp: {
         type: String,
-        required: true
+
     },
     createdAt: {
         type: Date,
@@ -16,8 +16,9 @@ const otpSchema = new mongoose.Schema({
     },
     expiresAt: {
         type: Date,
-        required: true
-    }
+
+    },
+
 });
 
 // Automatically set expiration time to 30 seconds from creation

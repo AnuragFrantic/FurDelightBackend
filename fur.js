@@ -9,7 +9,8 @@ const mongoose = require('mongoose');
 const cors = require("cors")
 const path = require('path');
 
-const mainroutes = require('./routes/route')
+const mainroutes = require('./routes/route');
+const Register = require('./models/Register');
 
 // const fs = require("fs");
 // const https = require("https");
@@ -50,10 +51,14 @@ const connect = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URL);
         console.log('MongoDB database connected');
+
+
     } catch (err) {
         console.error('MongoDB database connection failed', err);
     }
 };
+
+
 
 
 

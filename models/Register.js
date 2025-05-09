@@ -4,8 +4,10 @@ const schema = new Schema(
         username: {
             type: String,
             unique: true,
-
             trim: true
+        },
+        name: {
+            type: String
         },
         about: {
             type: String
@@ -29,9 +31,6 @@ const schema = new Schema(
         },
         email: {
             type: String,
-            unique: true,
-            lowercase: true,
-            trim: true
         },
         dob: {
             type: String,

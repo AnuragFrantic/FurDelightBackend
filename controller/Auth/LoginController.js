@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const Otp = require("../../models/Otp");
 const User = require("../../models/Register");
+const { default: mongoose } = require("mongoose");
 
 // Get all OTPs
 exports.getAllOtp = async (req, res) => {
@@ -12,9 +13,11 @@ exports.getAllOtp = async (req, res) => {
     }
 };
 
+
 // Send OTP
 exports.sendOtp = async (req, res) => {
     try {
+
         const { phone } = req.body;
 
         if (!phone) {
@@ -22,14 +25,8 @@ exports.sendOtp = async (req, res) => {
         }
         const normalizedPhone = phone.toString().trim();
 
-
-        const existingUser = await User.findOne({ phone: normalizedPhone });
+        const existingUser = await User.findOne({ phone: normalizedPhone, deleted_at: null });
         const isOld = !!existingUser;
-
-
-
-
-
 
 
 
@@ -88,8 +85,9 @@ exports.verifyOtp = async (req, res) => {
         phone = phone?.toString().trim();
         otp = otp?.toString().trim();
 
-        console.log("Incoming Phone:", phone);
-        console.log("Incoming OTP:", otp);
+
+
+        const username = phone;
 
         if (!phone || !otp) {
             return res.status(400).json({ error: 1, message: "Phone and OTP are required!" });
@@ -121,7 +119,7 @@ exports.verifyOtp = async (req, res) => {
         let isOld = true;
 
         if (user && user.deleted_at) {
-            user = null; // Ignore old user
+            user = null;
         }
 
 
@@ -129,8 +127,8 @@ exports.verifyOtp = async (req, res) => {
         if (!user) {
 
             try {
-                user = new User({ phone, user_type });
-                await user.save();
+
+                user = await User.create({ phone, user_type, username });
                 isOld = false;
             } catch (saveError) {
                 console.error("Error while creating user:", saveError);
