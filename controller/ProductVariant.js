@@ -66,9 +66,9 @@ exports.createProductVariant = async (req, res) => {
 
         await newVariant.save();
 
-        res.status(201).json({ success: true, message: "Product Variant created", data: newVariant });
+        res.status(201).json({ success: true, message: "Product Variant created", data: newVariant, error: 0 });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: error.message, error: 1 });
     }
 };
 
@@ -83,7 +83,7 @@ exports.getAllProductVariants = async (req, res) => {
         if (req.query.product) filter.product = req.query.product;
 
         const variants = await ProductVariant.find(filter)
-            .populate("product", "title")
+            .populate("product unit", "title")
         res.json({ success: true, data: variants, error: 0 });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message, error: 1 });
@@ -192,6 +192,30 @@ exports.updateProductVariant = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: "Product Variant update failed", error: 1 });
+    }
+};
+
+
+
+
+exports.getvariantbyproduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const variants = await ProductVariant.find({ product: id, deleted_at: null })
+            .populate("product", "title description short_description shop_by_category brand")
+            .populate("unit");
+
+        res.status(200).json({
+            success: true,
+            message: `Variants for product ${id}`,
+            data: variants,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
 };
 

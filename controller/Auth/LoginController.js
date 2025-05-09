@@ -22,9 +22,14 @@ exports.sendOtp = async (req, res) => {
         }
         const normalizedPhone = phone.toString().trim();
 
-        // Check if user already exists
+
         const existingUser = await User.findOne({ phone: normalizedPhone });
         const isOld = !!existingUser;
+
+
+
+
+
 
 
 

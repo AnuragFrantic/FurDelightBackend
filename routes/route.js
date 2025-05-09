@@ -28,7 +28,7 @@ const { createSlot, getSlotById, updateSlot, deleteSlot, getAllSlots } = require
 const { createModule, getAllModules, getModuleById, updateModule, deleteModule } = require('../controller/PermissionController/ModulesController');
 const { createPermission, getAllPermissions, getPermissionById, updatePermission, deletePermission } = require('../controller/PermissionController/DefaultPermissionController');
 
-const { createProductVariant, getAllProductVariants, getProductVariantById, updateProductVariant, deleteProductVariant, deleteProductVariantImage } = require('../controller/ProductVariant');
+const { createProductVariant, getAllProductVariants, getProductVariantById, updateProductVariant, deleteProductVariant, deleteProductVariantImage, getvariantbyproduct } = require('../controller/ProductVariant');
 const auth = require('../middleware/auth');
 const authmiddleware = require('../middleware/authmiddleware');
 
@@ -81,7 +81,7 @@ router.post("/login", loginWithEmailPassword);
 
 // splash api 
 
-router.get('/splash', auth("splash", "Read"), getAllSplash)
+router.get('/splash', getAllSplash)
 router.post('/splash', upload.single('image'), createSplashScreen)
 router.put("/splash/:id", upload.single("image"), updateSplashScreen);
 router.delete('/delete_splash/:id', deleteSplash)
@@ -218,7 +218,9 @@ router.delete("/product/:productid/images", clearAllProductImages);
 router.post('/product_variant', upload.array('image', 8), createProductVariant);
 router.get('/product_variant', getAllProductVariants);
 router.get('/product_variant/:id', getProductVariantById);
-router.put('/product_variant/:id', updateProductVariant);
+
+router.get('/variant_by_product/:id', getvariantbyproduct)
+router.put('/update_product_variant/:id', updateProductVariant);
 router.delete('/delete_product_variant/:id', deleteProductVariant);
 router.delete("/delete-variantimage/:imageId", deleteProductVariantImage);
 
