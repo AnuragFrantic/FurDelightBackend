@@ -115,19 +115,17 @@ exports.verifyOtp = async (req, res) => {
         await Otp.deleteOne({ phone });
 
         // 🔍 Find or create user
-        let user = await User.findOne({ phone }).populate("user_type");
+        let user = await User.findOne({ phone, deleted_at: null }).populate("user_type");
         let isOld = true;
 
-        if (user && user.deleted_at) {
-            user = null;
-        }
+
 
 
 
         if (!user) {
 
             try {
-
+                // in this if user is new then he is creating here with user_type 
                 user = await User.create({ phone, user_type, username });
                 isOld = false;
             } catch (saveError) {
