@@ -11,7 +11,7 @@ const authMiddleware = require('../middleware/authmiddleware');
 const { createPettype, updatePettype, getAllPettypes, getPettypeById, deletePettype } = require('../controller/PetTypeController');
 const { createPetBreed, getAllPetBreeds, getPetBreedById, updatePetBreed, deletePetBreed } = require('../controller/PetBreedController');
 
-const { createPet, getAllPets, getPetById, updatePet, deletePet, getMyPets } = require('../controller/PetController');
+const { createPet, getAllPets, getPetById, updatePet, deletePet, getMyPets, addPetFormEntry, deletePetFormEntry } = require('../controller/PetController');
 const { createPetEssential, getAllPetEssentials, getPetEssentialById, updatePetEssential, deletePetEssential } = require('../controller/PetEssentialController');
 const { CreateCategory, getAllCategory, updateCategory, deleteCategory } = require('../controller/Categories');
 const { createShop, getAllShopCategory, updateShopCategory, deleteShopCategory } = require('../controller/ShopbyCateory');
@@ -31,6 +31,9 @@ const { createPermission, getAllPermissions, getPermissionById, updatePermission
 const { createProductVariant, getAllProductVariants, getProductVariantById, updateProductVariant, deleteProductVariant, deleteProductVariantImage, getvariantbyproduct } = require('../controller/ProductVariant');
 const auth = require('../middleware/auth');
 const authmiddleware = require('../middleware/authmiddleware');
+const { createForm, getFormById, getAllForms, updateForm, deleteForm } = require('../controller/PetProfileForm');
+const { createVaccination, getAllVaccinations, getVaccinationById, updateVaccination, deleteVaccination } = require('../controller/UpcomingVaccination');
+const { createRecord, getAllRecords, getRecordById, updateRecord, deleteRecord } = require('../controller/MyRecords');
 
 
 
@@ -55,7 +58,7 @@ const uploadFields = upload.fields([
 
 
 
-router.post('/user_type', auth("usertype", "Create"), createUserType);
+router.post('/user_type', auth("usertype", "Write"), createUserType);
 router.get('/user_type', auth("usertype", "Read"), getAllUserTypes);
 router.get('/user_type/:id', auth("usertype", "Read"), getUserTypeById);
 router.put('/user_type/:id', auth("usertype", "Delete"), updateUserType);
@@ -137,7 +140,7 @@ router.delete("/pet_type_delete/:id", deletePettype);
 // Create
 router.post(
     "/pet_breeds",
-    auth("petbreed", "Create"),
+    auth("petbreed", "Write"),
     upload.single("image"),
     createPetBreed
 );
@@ -167,12 +170,15 @@ router.delete(
 
 
 // pet 
-router.post('/pet', auth("pet", "Create"), upload.single('image'), createPet);
+router.post('/pet', auth("pet", "Write"), upload.single('image'), createPet);
 router.get('/pet', getAllPets);
 router.get('/pet/:id', getPetById);
 router.put('/pet/:id', auth("pet", "Update"), upload.single('image'), updatePet);
 router.get("/my-pets", auth("pet", "Read"), getMyPets);
 router.delete('/pet/:id', deletePet);
+router.post('/pet/:id/pet_form', addPetFormEntry);
+router.delete('/pets/:id/form/:questionId', deletePetFormEntry);
+
 
 // pet Essential
 
@@ -251,7 +257,7 @@ router.delete("/delete_unit/:id", softDeleteUnit);
 
 router.post(
     "/petfood_type",
-    auth("petfoodtype", "Create"),
+    auth("petfoodtype", "Write"),
     createPetfoodType
 );
 
@@ -293,13 +299,13 @@ router.get('/pet_activity', getAllActivity)
 router.delete('/pet_activity/:id', deletePetActivity)
 
 // Booking
-router.post('/booking', auth("booking", "Create"), create_booking);
+router.post('/booking', auth("booking", "Write"), create_booking);
 router.get('/booking', auth("booking", "Read"), get_booking);
 
 // slots
 
 
-router.post('/doctorslot', auth("slot", "Create"), doctorCreateSlot);
+router.post('/doctorslot', auth("slot", "Write"), doctorCreateSlot);
 router.get('/doctorslot', get_slot);
 router.get('/doctorslot/all', getAllDoctorSlots);
 
@@ -320,7 +326,7 @@ router.delete('/slots/:id', deleteSlot);
 // wishlist
 
 
-router.post('/wishlist', auth("wishlist", "Create"), addToWishlist);
+router.post('/wishlist', auth("wishlist", "Write"), addToWishlist);
 router.get('/wishlist', getAllWishlists);
 router.get('/my_wishlist', auth("wishlist", "Read"), getMyWishlist);
 router.get('/wishlist/doctors', auth("wishlist", "Read"), getMyDoctorWishlist);
@@ -334,9 +340,7 @@ router.delete('/wishlist/delete', auth("wishlist", "Delete"), deleteWishlist);
 router.post('/module', upload.single('image'), createModule);
 router.get('/module', getAllModules);
 router.get('/module/:id', getModuleById);
-
 router.put('/module/:id', upload.single('image'), updateModule);
-
 router.delete('/delete-module/:id', deleteModule);
 
 
@@ -350,6 +354,37 @@ router.get('/default-permission/:id', getPermissionById);
 router.put('/default-permission/:id', updatePermission);
 
 router.delete('/delete_default-permission/:id', deletePermission);
+
+
+
+// pet form
+
+router.post('/pet_form', createForm);
+router.get('/pet_form', getAllForms);
+router.get('/pet_form/:id', getFormById);
+router.put('/update_pet_form/:id', updateForm);
+router.delete('/delete_pet_form/:id', deleteForm);
+
+
+// upcomingvaccination
+
+
+
+
+router.post("/upcoming_vaccination", createVaccination);
+router.get("/upcoming_vaccination", getAllVaccinations);
+router.get("/upcoming_vaccination/:id", getVaccinationById);
+router.put("/update_upcoming_vaccination/:id", updateVaccination);
+router.delete("/delete_upcoming_vaccination/:id", deleteVaccination);
+
+
+// my record
+
+router.post("/my_record", auth("records", "Write"), createRecord);
+router.get("/my_record", getAllRecords);
+router.get("/my_record/:id", getRecordById);
+router.put("/update_my_record/:id", updateRecord);
+router.delete("/delete_my_record/:id", deleteRecord);
 
 
 

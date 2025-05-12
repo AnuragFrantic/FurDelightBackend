@@ -4,15 +4,20 @@ const UpcomingVaccination = new mongoose.Schema({
     name: {
         type: String,
     },
-    time : {
+    time: {
         type: String,
     },
-    date : {
+    date: {
         type: Date
+    },
+    age: {
+        type: String
     },
 
 
-})
+
+
+}, { timestamps: true })
 
 
 

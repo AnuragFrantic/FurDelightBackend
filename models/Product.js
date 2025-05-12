@@ -9,27 +9,22 @@ const schema = new Schema({
     title: { type: String, required: true },
     url: { type: String, unique: true },
     image: [ImageSchema],
-    mrp: { type: Number, required: true, default: 0 },
-    price: { type: Number, required: true },
-    stock: { type: Number, required: true },
+
+    hide: { type: Boolean },
     stock_status: { type: String, enum: ['in_stock', 'out_of_stock', 'pre_order'], default: 'in_stock' },
     sku: { type: String, unique: true, required: true },
     description: { type: String },
     short_description: { type: String },
-
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     shop_by_category: { type: mongoose.Schema.Types.ObjectId, ref: 'ShopByCategory' },
     brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
-    weight: { type: Number },
+
     // color_variants: [{ type: String  }],
     // size_variants: [{ type: String }],
     // materials: [{ type: String }],
     warranty: { type: String },
     return_policy: { type: String },
-    wishlist: {
-        type: Boolean,
-        default: false
-    },
+
 
 
     deleted_at: { type: Date },

@@ -38,6 +38,26 @@ const schema = new Schema({
     daily_walk_routine: {
         type: String
     },
+    pet_form: [
+        {
+            question: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'PetProfileForm'
+            },
+            answerId: [
+                {
+                    type: mongoose.Schema.Types.ObjectId,
+                    refPath: 'pet_form.answerModel'
+                }
+            ],
+            answer: {
+                type: String
+            },
+            answerModel: {
+                type: String,
+            }
+        }
+    ],
     activity: [
         {
             type: mongoose.Schema.Types.ObjectId,

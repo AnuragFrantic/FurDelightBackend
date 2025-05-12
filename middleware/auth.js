@@ -42,7 +42,7 @@ const auth = (requiredRole = "", requiredPermission = "") => {
                 role.type.name.toLowerCase() === requiredRole.toLowerCase()
             );
 
-            console.log(matchingRoles)
+
 
             if (matchingRoles.length === 0) {
                 return res.status(403).json({

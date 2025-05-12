@@ -11,6 +11,7 @@ const ProductVariantSchema = new mongoose.Schema({
         ref: "Product",
         required: true
     },
+    url: { type: String, unique: true },
     name: {
         type: String
     },
@@ -49,11 +50,17 @@ const ProductVariantSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
-    warranty: { type: String },
     stock_status: {
         type: String,
         enum: ["in_stock", "out_of_stock", "pre_order"],
         default: "in_stock"
+    },
+    wishlist: {
+        type: Boolean,
+        default: false
+    },
+    hide: {
+        type: Boolean
     },
     unit: { type: mongoose.Schema.Types.ObjectId, ref: 'Unit' },
     unit_value: { type: String },
