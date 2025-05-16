@@ -34,6 +34,11 @@ const authmiddleware = require('../middleware/authmiddleware');
 const { createForm, getFormById, getAllForms, updateForm, deleteForm } = require('../controller/PetProfileForm');
 const { createVaccination, getAllVaccinations, getVaccinationById, updateVaccination, deleteVaccination } = require('../controller/UpcomingVaccination');
 const { createRecord, getAllRecords, getRecordById, updateRecord, deleteRecord } = require('../controller/MyRecords');
+const { createFaq, getAllFaqs, getFaqById, updateFaq, deleteFaq } = require('../controller/FaqController');
+const { createPolicy, getAllPolicies, getPolicyById, updatePolicy, deletePolicy } = require('../controller/PolicyController');
+const { addToCart, getCartItems, removeCartItem, updateCartItemQuantity } = require('../controller/CartController');
+const { addShippingAddress, setActiveShippingAddress, getUserShippingAddresses, getActiveShippingAddress } = require('../controller/ShippingAddressController');
+
 
 
 
@@ -221,11 +226,11 @@ router.delete("/product/:productid/images", clearAllProductImages);
 
 // prouctvariant
 
-router.post('/product_variant', upload.array('image', 8), createProductVariant);
-router.get('/product_variant', getAllProductVariants);
-router.get('/product_variant/:id', getProductVariantById);
+router.post('/product_variant', upload.array('image', 8), auth('productvariant', "Write"), createProductVariant);
+router.get('/product_variant', auth('productvariant', "Read"), getAllProductVariants);
+router.get('/product_variant/:id', auth('productvariant', "Read"), getProductVariantById);
 
-router.get('/variant_by_product/:id', getvariantbyproduct)
+router.get('/variant_by_product/:id', auth('productvariant', "Read"), getvariantbyproduct)
 router.put('/update_product_variant/:id', updateProductVariant);
 router.delete('/delete_product_variant/:id', deleteProductVariant);
 router.delete("/delete-variantimage/:imageId", deleteProductVariantImage);
@@ -381,12 +386,92 @@ router.delete("/delete_upcoming_vaccination/:id", deleteVaccination);
 // my record
 
 router.post("/my_record", auth("records", "Write"), createRecord);
-router.get("/my_record", getAllRecords);
+router.get("/my_record", auth("records", "Read"), getAllRecords);
 router.get("/my_record/:id", getRecordById);
 router.put("/update_my_record/:id", updateRecord);
 router.delete("/delete_my_record/:id", deleteRecord);
 
 
+
+//Faq
+
+router.post('/faq', auth("faq", "Write"), createFaq);
+
+// Get all FAQs - public
+router.get('/faq', getAllFaqs);
+
+// Get FAQ by ID - public
+router.get('/faq/:id', getFaqById);
+
+// Update FAQ by ID - requires authentication
+router.put('/faq/:id', auth("faq", "Update"), updateFaq);
+
+// Soft delete FAQ by ID - requires authentication
+router.delete('/delete_faq/:id', auth("faq", "Delete"), deleteFaq);
+
+
+// 
+
+router.post('/policy', auth("policy", "Write"), createPolicy);
+
+// Get all policies
+router.get('/policy', getAllPolicies);
+
+// Get a policy by ID
+router.get('/policy/:id', getPolicyById);
+
+// Update a policy by ID
+router.put('/policy/:id', auth("policy", "Update"), updatePolicy);
+
+// Soft delete a policy by ID
+router.delete('/policy/:id', auth("policy", "Delete"), deletePolicy);
+
+
+
+
+// Cart
+
+// Add or update cart
+router.post('/add_to_cart', auth("cart", "Write"), addToCart);
+
+// Get cart for user
+router.get('/cart', auth("cart", "Read"), getCartItems);
+
+// Remove cart item
+router.delete('/delete_cart/:cartItemId', auth("cart", "Delete"), removeCartItem);
+
+// Update quantity
+router.put('/update_cart/:cartItemId', auth("cart", "Update"), updateCartItemQuantity);
+
+
+
+// shipping address
+router.post(
+    "/shipping-address",
+    auth("address", "Write"),
+    addShippingAddress
+);
+
+// Set an existing address as active
+router.put(
+    "/shipping-address/:addressId/activate",
+    auth("address", "Update"),
+    setActiveShippingAddress
+);
+
+// Get all addresses of the user
+router.get(
+    "/shipping-address",
+    auth("address", "Read"),
+    getUserShippingAddresses
+);
+
+// Get only the active shipping address
+router.get(
+    "/shipping-address/active",
+    auth("address", "Read"),
+    getActiveShippingAddress
+);
 
 
 

@@ -5,6 +5,9 @@ const schema = new Schema({
     detail: { type: String },
     type: { type: String },
     deleted_at: { type: Date },
+    url: {
+        type: String
+    },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
@@ -18,4 +21,4 @@ const schema = new Schema({
 
 
 
-module.exports = mongoose.model("Faq", schema);
+module.exports = mongoose.model("Policy", schema);

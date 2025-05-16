@@ -1,5 +1,7 @@
 const ProductVariant = require('../models/ProductVariant');
 
+const WishlistModal = require("../models/Wishlist")
+
 
 // with multiple size mutl
 
@@ -80,19 +82,41 @@ exports.createProductVariant = async (req, res) => {
 exports.getAllProductVariants = async (req, res) => {
     try {
         const filter = {};
+        const userId = req.userId;
         if (req.query.product) filter.product = req.query.product;
 
+        // Fetch variants and populate product & unit titles
         const variants = await ProductVariant.find(filter)
-            .populate("product unit", "title")
-        res.json({ success: true, data: variants, error: 0 });
+            .populate('product', 'title')
+            .populate('unit', 'title');
+
+        // Fetch user's wishlist
+        const wishlist = await WishlistModal.findOne({ user: userId, is_deleted: false }).select('items');
+
+        // Extract only ProductVariant-type item IDs
+        const wishlistVariantIds = wishlist
+            ? wishlist.items
+                .filter(item => item.item_type === 'ProductVariant')
+                .map(item => item.item.toString())
+            : [];
+
+        // Attach wishlist flag to each variant
+        const variantsWithWishlist = variants.map(variant => ({
+            ...variant.toObject(),
+            wishlist: wishlistVariantIds.includes(variant._id.toString())
+        }));
+
+        return res.status(200).json({ success: true, data: variantsWithWishlist, error: 0 });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message, error: 1 });
+        console.error('Error fetching product variants:', error);
+        return res.status(500).json({ success: false, message: error.message, error: 1 });
     }
 };
-
 // Get a single Product Variant by ID
 exports.getProductVariantById = async (req, res) => {
     try {
+        const userId = req.query.userId || req.userId;
+
         const variant = await ProductVariant.findById(req.params.id)
             .populate("product", "title")
             .populate("unit", "title");
@@ -101,11 +125,33 @@ exports.getProductVariantById = async (req, res) => {
             return res.status(404).json({ success: false, message: "Variant not found", error: 1 });
         }
 
-        res.json({ success: true, data: variant, error: 0 });
+        let isWishlisted = false;
+
+        if (userId) {
+            const wishlist = await WishlistModal.findOne({ user: userId, is_deleted: false }).select("items");
+
+            if (wishlist) {
+                isWishlisted = wishlist.items.some(i =>
+                    i.item.toString() === req.params.id && i.item_type === 'ProductVariant'
+                );
+            }
+        }
+
+        const productData = {
+            ...variant.toObject(),
+            wishlist: isWishlisted
+        };
+
+        res.json({ success: true, data: productData, error: 0 });
+
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message, error: 1 });
+        console.error("Error fetching product variant:", error);
+        res.status(500).json({ success: false, message: "Something went wrong", error: 1 });
     }
 };
+
+
+
 
 
 // exports.updateProductVariant = async (req, res) => {
@@ -201,23 +247,46 @@ exports.updateProductVariant = async (req, res) => {
 exports.getvariantbyproduct = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.userId || req.query.userId; // fallback if sent via query
 
         const variants = await ProductVariant.find({ product: id, deleted_at: null })
             .populate("product", "title description short_description shop_by_category brand")
-            .populate("unit");
+            .populate("unit", "title");
+
+        let wishlistProductIds = [];
+
+        if (userId) {
+            const wishlist = await WishlistModal.findOne({ user: userId }).select("items");
+
+            wishlistProductIds = wishlist
+                ? wishlist.items
+                    .filter(i => i.item_type === 'Product' || i.item_type === 'ProductVariant')
+                    .map(i => i.item.toString())
+                : [];
+        }
+
+        const enrichedVariants = variants.map(variant => ({
+            ...variant.toObject(),
+            wishlist: wishlistProductIds.includes(variant._id.toString())
+        }));
 
         res.status(200).json({
             success: true,
-            message: `Variants for product ${id}`,
-            data: variants,
+            message: `Fetched variants for product ID: ${id}`,
+            data: enrichedVariants,
+            error: 0
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error.message,
+            message: "Error fetching product variants",
+            error: error.message,
+            errorCode: 1
         });
     }
 };
+
+
 
 
 

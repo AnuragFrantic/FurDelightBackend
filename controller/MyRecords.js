@@ -1,19 +1,27 @@
 const MyRecords = require("../models/MyRecords");
 
-// Create a new MyRecord
+// Create a new record
 exports.createRecord = async (req, res) => {
     try {
+        const userId = req.userId;
+        const { upcoming_vaccination, vaccination_time, vaccination_date } = req.body;
 
-        const userid = req.userId;
-        const record = await MyRecords.create(req.body);
-        res.status(201).json({
+        const record = await MyRecords.create({
+            user: userId,
+            upcoming_vaccination,
+            vaccination_time,
+            vaccination_date
+        });
+
+        return res.status(201).json({
             success: true,
             message: "Record created successfully",
             data: record,
             error: 0
         });
     } catch (error) {
-        res.status(500).json({
+        console.error('Error creating record:', error);
+        return res.status(500).json({
             success: false,
             message: "Failed to create record",
             error: 1,
@@ -22,22 +30,25 @@ exports.createRecord = async (req, res) => {
     }
 };
 
-// Get all MyRecords
+// Get all records
 exports.getAllRecords = async (req, res) => {
     try {
-        const records = await MyRecords.find()
-            .populate("user", "name email") // Adjust fields as needed
-            .populate("upcoming_vaccination", "name date time") // Adjust fields as needed
+        const userId = req.userId;
+
+        const records = await MyRecords.find({ user: userId })
+            .populate("user", "name email")
+            .populate("upcoming_vaccination", "name date time")
             .sort({ createdAt: -1 });
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Records fetched successfully",
             data: records,
             error: 0
         });
     } catch (error) {
-        res.status(500).json({
+        console.error('Error fetching records:', error);
+        return res.status(500).json({
             success: false,
             message: "Failed to fetch records",
             error: 1,
@@ -46,7 +57,8 @@ exports.getAllRecords = async (req, res) => {
     }
 };
 
-// Get a single MyRecord by ID
+
+// Get a single record by ID
 exports.getRecordById = async (req, res) => {
     try {
         const record = await MyRecords.findById(req.params.id)
@@ -61,14 +73,15 @@ exports.getRecordById = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Record fetched successfully",
             data: record,
             error: 0
         });
     } catch (error) {
-        res.status(500).json({
+        console.error('Error fetching record by ID:', error);
+        return res.status(500).json({
             success: false,
             message: "Failed to fetch record",
             error: 1,
@@ -77,10 +90,17 @@ exports.getRecordById = async (req, res) => {
     }
 };
 
-// Update a MyRecord
+// Update a record
 exports.updateRecord = async (req, res) => {
     try {
-        const updated = await MyRecords.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { upcoming_vaccination, vaccination_time, vaccination_date } = req.body;
+
+        const updated = await MyRecords.findOneAndUpdate(
+            { _id: req.params.id },
+            { upcoming_vaccination, vaccination_time, vaccination_date },
+            { new: true }
+        );
+
         if (!updated) {
             return res.status(404).json({
                 success: false,
@@ -89,14 +109,15 @@ exports.updateRecord = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Record updated successfully",
             data: updated,
             error: 0
         });
     } catch (error) {
-        res.status(500).json({
+        console.error('Error updating record:', error);
+        return res.status(500).json({
             success: false,
             message: "Failed to update record",
             error: 1,
@@ -105,10 +126,11 @@ exports.updateRecord = async (req, res) => {
     }
 };
 
-// Delete a MyRecord
+// Delete a record
 exports.deleteRecord = async (req, res) => {
     try {
         const deleted = await MyRecords.findByIdAndDelete(req.params.id);
+
         if (!deleted) {
             return res.status(404).json({
                 success: false,
@@ -117,14 +139,15 @@ exports.deleteRecord = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Record deleted successfully",
             data: deleted,
             error: 0
         });
     } catch (error) {
-        res.status(500).json({
+        console.error('Error deleting record:', error);
+        return res.status(500).json({
             success: false,
             message: "Failed to delete record",
             error: 1,

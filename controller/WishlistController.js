@@ -1,7 +1,6 @@
 const Wishlist = require('../models/Wishlist');
-const Product = require('../models/Product');
 
-
+// Add or remove an item (ProductVariant or User doctor) to the user's wishlist
 exports.addToWishlist = async (req, res) => {
     try {
         const userId = req.userId;
@@ -9,109 +8,88 @@ exports.addToWishlist = async (req, res) => {
 
         // Validate incoming type
         if (!['product', 'doctor'].includes(type)) {
-            return res.status(400).json({ message: 'Invalid type. Must be product or doctor.' });
+            return res.status(400).json({ success: false, message: 'Invalid type. Must be "product" or "doctor".' });
         }
 
-        // Resolve item_type from type
-        const item_type = type === 'product' ? 'Product' : 'User';
+        // Resolve item_type for refPath
+        const item_type = type === 'product' ? 'ProductVariant' : 'User';
 
-        // Check if wishlist already exists for user
+        // Find or create the wishlist document for this user
         let wishlist = await Wishlist.findOne({ user: userId });
-
         if (!wishlist) {
-            // If not, create new wishlist
-            wishlist = new Wishlist({
-                user: userId,
-                items: [{
-                    item: itemId,
-                    item_type
-                }],
-                type,
-
-            });
-
-
-
-            await wishlist.save();
-
-
-
-            return res.status(201).json({ message: 'Wishlist created and item added.', wishlist, error: 0 });
+            wishlist = new Wishlist({ user: userId, items: [], type });
         }
 
-        // Check if item already exists
+        // Check if the item already exists in the wishlist
         const exists = wishlist.items.some(i =>
             i.item.toString() === itemId && i.item_type === item_type
         );
 
         if (exists) {
-            // Remove the item from the wishlist
+            // Remove it
             wishlist.items = wishlist.items.filter(i =>
                 !(i.item.toString() === itemId && i.item_type === item_type)
             );
-
-            // Recalculate wishlist type after removal
-            const remainingTypes = new Set(wishlist.items.map(i => i.item_type));
-            if (remainingTypes.size === 2) {
-                wishlist.type = 'mixed';
-            } else if (remainingTypes.has('Product')) {
-                wishlist.type = 'product';
-            } else if (remainingTypes.has('User')) {
-                wishlist.type = 'doctor';
-            } else {
-                wishlist.type = 'mixed';
-            }
-
-            wishlist.updated_by = userId;
-            await wishlist.save();
-
-            return res.status(200).json({ message: 'Item removed from wishlist.', wishlist, error: 0 });
+        } else {
+            // Add it
+            wishlist.items.push({ item: itemId, item_type });
         }
 
-
-        // Add new item to existing wishlist
-        wishlist.items.push({ item: itemId, item_type });
-
-        // Update wishlist type intelligently
-        const existingTypes = new Set(wishlist.items.map(i => i.item_type));
-        existingTypes.add(item_type); // include new item
-
-        if (existingTypes.size === 2) {
+        // Recalculate wishlist "type" field (product, doctor, mixed)
+        const typesSet = new Set(wishlist.items.map(i => i.item_type));
+        if (typesSet.size === 2) {
             wishlist.type = 'mixed';
-        } else if (existingTypes.has('Product')) {
+        } else if (typesSet.has('ProductVariant')) {
             wishlist.type = 'product';
-        } else if (existingTypes.has('User')) {
+        } else if (typesSet.has('User')) {
             wishlist.type = 'doctor';
+        } else {
+            wishlist.type = 'mixed';
         }
 
         wishlist.updated_by = userId;
         await wishlist.save();
 
-        return res.status(200).json({ message: 'Item added to wishlist.', wishlist, error: 0 });
-
+        const message = exists ? 'Item removed from wishlist.' : 'Item added to wishlist.';
+        return res.status(exists ? 200 : 201).json({ success: true, message, wishlist, error: 0 });
     } catch (error) {
-        console.error('Error adding to wishlist:', error);
-        res.status(500).json({ message: 'Server error', error, error: 1 });
+        console.error('Error adding/removing wishlist item:', error);
+        return res.status(500).json({ success: false, message: 'Server error', error: 1 });
     }
 };
 
-
-
-
-// 🟡 Get All Wishlists (admin-level)
+// Admin: Get all wishlists
 exports.getAllWishlists = async (req, res) => {
     try {
         const wishlists = await Wishlist.find({ is_deleted: false })
             .populate('user')
             .populate('items.item');
 
-        res.status(200).json({ data: wishlists, error: 0 });
+        return res.status(200).json({ success: true, data: wishlists, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error fetching wishlists', error: err.message, error: 1 });
+        console.error('Error fetching all wishlists:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching wishlists', error: 1 });
     }
 };
 
-// 🔵 Get Own Wishlist (all items)
+// User: Get own wishlist (all items)
+// exports.getMyWishlist = async (req, res) => {
+//     try {
+//         const userId = req.userId;
+//         const wishlist = await Wishlist.findOne({ user: userId, is_deleted: false })
+//             .populate('items.item')
+
+//         if (!wishlist) {
+//             return res.status(404).json({ success: false, message: 'No wishlist found', error: 1 });
+//         }
+
+//         return res.status(200).json({ success: true, data: wishlist, error: 0 });
+//     } catch (err) {
+//         console.error('Error fetching user wishlist:', err);
+//         return res.status(500).json({ success: false, message: 'Error fetching wishlist', error: 1 });
+//     }
+// };
+
 exports.getMyWishlist = async (req, res) => {
     try {
         const userId = req.userId;
@@ -120,50 +98,72 @@ exports.getMyWishlist = async (req, res) => {
             .populate('items.item');
 
         if (!wishlist) {
-            return res.status(404).json({ message: 'No wishlist found', error: 1 });
+            return res.status(201).json({ success: false, message: 'No wishlist found', error: 1, data: [] });
         }
 
-        res.status(200).json({ data: wishlist, error: 0 });
+
+
+        // Deep copy and remove `wishlist` key from populated items
+        const wishlistData = wishlist.toObject();
+        wishlistData.items = wishlistData.items.map(entry => {
+            if (entry.item && entry.item.wishlist !== undefined) {
+                const { wishlist, ...cleanedItem } = entry.item;
+                return {
+                    ...entry,
+                    item: cleanedItem
+                };
+            }
+            return entry;
+        });
+
+
+
+        return res.status(200).json({ success: true, data: wishlistData, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error fetching wishlist', error: err.message, error: 0 });
+        console.error('Error fetching user wishlist:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching wishlist', error: 1 });
     }
 };
 
-// 🟣 Get Own Doctor Wishlist
+
+
+
+// User: Get only doctor items from own wishlist
 exports.getMyDoctorWishlist = async (req, res) => {
     try {
         const userId = req.userId;
-
-        const wishlist = await Wishlist.findOne({ user: userId, is_deleted: false });
+        const wishlist = await Wishlist.findOne({ user: userId, is_deleted: false })
+            .populate('items.item');
 
         if (!wishlist) {
-            return res.status(404).json({ message: 'No wishlist found', error: 1 });
+            return res.status(404).json({ success: false, message: 'No wishlist found', error: 1 });
         }
 
         const doctorItems = wishlist.items.filter(i => i.item_type === 'User');
-        res.status(200).json({ data: doctorItems, error: 0 });
+        return res.status(200).json({ success: true, data: doctorItems, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error fetching doctor wishlist', error: err.message, error: 1 });
+        console.error('Error fetching doctor wishlist:', err);
+        return res.status(500).json({ success: false, message: 'Error fetching doctor wishlist', error: 1 });
     }
 };
 
-// 🔴 Delete Wishlist (Soft Delete)
+// Soft-delete entire wishlist for a user
 exports.deleteWishlist = async (req, res) => {
     try {
         const userId = req.userId;
-
         const wishlist = await Wishlist.findOneAndUpdate(
-            { user: userId },
+            { user: userId, is_deleted: false },
             { is_deleted: true, deleted_at: new Date() },
             { new: true }
         );
 
         if (!wishlist) {
-            return res.status(404).json({ message: 'No wishlist found', error: 1 });
+            return res.status(404).json({ success: false, message: 'No wishlist found', error: 1 });
         }
 
-        res.status(200).json({ message: 'Wishlist deleted successfully', wishlist, error: 0 });
+        return res.status(200).json({ success: true, message: 'Wishlist deleted successfully', wishlist, error: 0 });
     } catch (err) {
-        res.status(500).json({ message: 'Error deleting wishlist', error: err.message, error: 1 });
+        console.error('Error deleting wishlist:', err);
+        return res.status(500).json({ success: false, message: 'Error deleting wishlist', error: 1 });
     }
 };

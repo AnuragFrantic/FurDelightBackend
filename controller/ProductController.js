@@ -90,7 +90,6 @@ exports.getAllProducts = async (req, res) => {
         }
 
         const products = await ProductModal.find(query)
-
             .populate("shop_by_category")
             .populate("brand");
 

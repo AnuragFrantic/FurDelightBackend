@@ -1,5 +1,7 @@
+const Cart = require("../models/Cart");
 const Pettype = require("../models/Petype");
-const ProductVariant = require("../models/ProductVariant");
+const Wishlist = require("../models/Wishlist");
+
 
 
 
@@ -9,7 +11,7 @@ const ProductVariant = require("../models/ProductVariant");
 
 // const clearAllPettypes = async () => {
 //     try {
-//         await ProductVariant.deleteMany({});
+//         await Wishlist.deleteMany({});
 //         console.log("✅ All Pettypes cleared successfully!");
 
 //     } catch (err) {

@@ -5,7 +5,7 @@ const mongoose = require("mongoose")
 const MyRecordsSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Register"
+        ref: "User"
     },
     upcoming_vaccination: {
         type: mongoose.Schema.Types.ObjectId,

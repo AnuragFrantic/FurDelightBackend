@@ -10,7 +10,7 @@ const WishlistItemSchema = new Schema({
     item_type: {
         type: String,
         required: true,
-        enum: ['Product', 'User']
+        enum: ['ProductVariant', 'User']
     },
     added_at: {
         type: Date,

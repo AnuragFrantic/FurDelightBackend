@@ -23,6 +23,10 @@ const schema = new Schema({
     // size_variants: [{ type: String }],
     // materials: [{ type: String }],
     warranty: { type: String },
+    rating: {
+        type: Number,
+        default: 0,
+    }, // Average rating of the product
     return_policy: { type: String },
 
 

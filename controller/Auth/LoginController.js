@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const Otp = require("../../models/Otp");
 const User = require("../../models/Register");
 const { default: mongoose } = require("mongoose");
+const Usertype = require("../../models/Usertype");
+const DefaultPermissionModal = require("../../models/DefaultPermission")
 
 // Get all OTPs
 exports.getAllOtp = async (req, res) => {
@@ -122,21 +124,65 @@ exports.verifyOtp = async (req, res) => {
 
 
 
-        if (!user) {
+        // if (!user) {
 
+        //     try {
+        //         // in this if user is new then he is creating here with user_type 
+        //         user = await User.create({ phone, user_type, username });
+        //         isOld = false;
+        //     } catch (saveError) {
+        //         console.error("Error while creating user:", saveError);
+        //         return res.status(500).json({
+        //             error: 1,
+        //             message: "Failed to create user",
+        //             details: saveError.message,
+        //         });
+        //     }
+        // }
+
+
+
+        if (!user) {
             try {
-                // in this if user is new then he is creating here with user_type 
-                user = await User.create({ phone, user_type, username });
+                // 1. Validate user_type exists
+                const userTypeData = await Usertype.findById(user_type);
+                if (!userTypeData) {
+                    return res.status(400).json({
+                        error: 1,
+                        message: "Invalid user_type ID!"
+                    });
+                }
+
+                // 2. Build base user data
+                const newUserData = {
+                    phone,
+                    user_type,
+                    username
+                };
+
+                // 3. Load default permissions, if any, and map roles
+                const defaultPermissions = await DefaultPermissionModal.findOne({ user_type });
+                if (defaultPermissions && Array.isArray(defaultPermissions.roles)) {
+                    newUserData.roles = defaultPermissions.roles.map(role => ({
+                        type: role.type,
+                        value: role.value
+                    }));
+                }
+
+                // 4. Create the user
+                user = await User.create(newUserData);
                 isOld = false;
+
             } catch (saveError) {
                 console.error("Error while creating user:", saveError);
                 return res.status(500).json({
                     error: 1,
                     message: "Failed to create user",
-                    details: saveError.message,
+                    details: saveError.message
                 });
             }
         }
+
 
         // 🔐 Generate JWT token
         const token = jwt.sign(
