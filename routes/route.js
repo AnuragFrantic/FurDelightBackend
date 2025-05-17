@@ -38,6 +38,7 @@ const { createFaq, getAllFaqs, getFaqById, updateFaq, deleteFaq } = require('../
 const { createPolicy, getAllPolicies, getPolicyById, updatePolicy, deletePolicy } = require('../controller/PolicyController');
 const { addToCart, getCartItems, removeCartItem, updateCartItemQuantity } = require('../controller/CartController');
 const { addShippingAddress, setActiveShippingAddress, getUserShippingAddresses, getActiveShippingAddress } = require('../controller/ShippingAddressController');
+const { createOrder, completeOnlinePayment, confirmCODPayment, getUserOrders, deleteOrder, updateOrderStatus } = require('../controller/OrderController');
 
 
 
@@ -473,6 +474,28 @@ router.get(
     getActiveShippingAddress
 );
 
+
+
+
+// ORder Routes
+
+
+router.post('/orders', auth("order", "Write"), createOrder);
+
+// Complete online payment (usually called via webhook or frontend callback)
+router.post('/orders/complete-payment', auth("order", "Write"), completeOnlinePayment);
+
+// Confirm COD payment (mark COD order as paid, admin or user confirmation)
+router.post('/orders/:orderId/confirm-cod', auth("order", "Write"), confirmCODPayment);
+
+// Get all orders of logged-in user
+router.get('/orders', auth("order", "Read"), getUserOrders);
+
+// Soft delete an order
+router.delete('/orders/:orderId', auth("order", "Delete"), deleteOrder);
+
+// Admin or authorized user updates payment or order status
+router.put('/orders/:orderId/status', auth("order", "Update"), updateOrderStatus);
 
 
 module.exports = router;

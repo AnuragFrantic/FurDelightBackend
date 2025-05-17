@@ -3,12 +3,8 @@ const schema = new Schema(
     {
         username: {
             type: String,
-            unique: true,
-            trim: true
         },
-        name: {
-            type: String
-        },
+
         about: {
             type: String
         },

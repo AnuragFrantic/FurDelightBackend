@@ -3,11 +3,13 @@ const Schema = mongoose.Schema;
 
 
 const schema = new Schema({
-
     user: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     net_payable_amount: { type: Number, required: true },
     total_amount: { type: Number, required: true },
     promo_discount: { type: Number, required: false },
+    shipping_address: {
+        type: Schema.Types.ObjectId, ref: 'ShippingAddress', required: false
+    },
     payment_status: {
         type: String,
         default: "Pending",
@@ -20,12 +22,33 @@ const schema = new Schema({
         trim: true,
         enum: ['COD', 'Online']
     },
+    order_status: {
+        type: String,
+        enum: [
+            'Created',        // Order created
+            'PendingPayment', // Waiting for online payment
+            'Confirmed',      // Payment done / COD confirmed
+            'Shipped',
+            'Delivered',
+            'Cancelled',
+            'Returned'
+        ],
+        default: 'Created'
+    },
 
     payment_request: { type: Schema.Types.Mixed, required: false },
     payment_response: { type: Schema.Types.Mixed, required: false },
+    cart_response: { type: Schema.Types.Mixed, required: false },
 
-    created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now },
+    order_placed: {
+        type: Boolean,
+        default: false
+    },
+    shipping_charge: {
+        type: Number
+    },
+
+
     deleted_at: { type: Date, default: null },
 
 }, { timestamps: true });

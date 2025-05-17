@@ -27,19 +27,17 @@ const clearAllPettypes = async () => {
 
 exports.createUser = async (req, res) => {
     try {
-        const { username, email, user_type, phone } = req.body;
+        const { email, user_type, phone } = req.body;
 
 
         const existingUser = await User.findOne({
-            $or: [{ username }, { email }, { phone }]
+            $or: [{ email }, { phone }]
         });
 
         if (existingUser) {
             let message = 'Username or Email already exists!';
-            if (existingUser.username === username && existingUser.email === email && existingUser.phone === phone) {
+            if (existingUser.email === email && existingUser.phone === phone) {
                 message = 'Username and Email already exist!';
-            } else if (existingUser.username === username) {
-                message = 'Username already exists!';
             } else if (existingUser.email === email) {
                 message = 'Email already exists!';
             } else if (existingUser.phone === phone) {
