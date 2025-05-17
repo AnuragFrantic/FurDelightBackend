@@ -110,12 +110,30 @@ exports.createUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select('-roles');
-        res.status(200).json({ success: true, data: users, error: 0 });
+        const { user_type } = req.query;
+
+        // Build query conditionally based on user_type
+        const query = {};
+        if (user_type) {
+            query.user_type = user_type;
+        }
+
+        const users = await User.find(query).select('-roles');
+
+        res.status(200).json({
+            success: true,
+            data: users,
+            error: 0
+        });
     } catch (error) {
-        res.status(500).json({ error: 1, message: "Internal Server Error", details: error.message, });
+        res.status(500).json({
+            error: 1,
+            message: "Internal Server Error",
+            details: error.message,
+        });
     }
 };
+
 
 // profile
 exports.getProfile = async (req, res) => {

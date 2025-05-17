@@ -3,8 +3,12 @@ const schema = new Schema(
     {
         username: {
             type: String,
+            unique: true,
+            trim: true
         },
-
+        name: {
+            type: String
+        },
         about: {
             type: String
         },
@@ -56,6 +60,7 @@ const schema = new Schema(
                 value: [{ type: String, required: false }]
             }
         ],
+
         lat: {
             type: Number,
         },
