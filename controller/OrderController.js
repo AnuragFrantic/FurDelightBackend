@@ -122,6 +122,38 @@ exports.completeOnlinePayment = async (req, res) => {
     }
 };
 
+
+
+
+exports.failOnlinePayment = async (req, res) => {
+    try {
+        const { order_id } = req.body;
+
+        const order = await Orders.findById(order_id);
+        if (!order) {
+            return res.status(404).json({ error: 1, message: "Order not found" });
+        }
+
+        if (order.payment_type !== "Online") {
+            return res.status(400).json({ error: 1, message: "Not an online order" });
+        }
+
+        order.payment_status = "Failed";
+        order.order_status = "Cancelled";
+        await order.save();
+
+        return res
+            .status(200)
+            .json({ error: 0, message: "Payment marked as failed", data: order });
+    } catch (err) {
+        console.error(err);
+        return res
+            .status(500)
+            .json({ error: 1, message: "Server error", details: err.message });
+    }
+};
+
+
 // Confirm COD payment (mark as paid when cash collected)
 exports.confirmCODPayment = async (req, res) => {
     try {

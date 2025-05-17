@@ -38,7 +38,7 @@ const { createFaq, getAllFaqs, getFaqById, updateFaq, deleteFaq } = require('../
 const { createPolicy, getAllPolicies, getPolicyById, updatePolicy, deletePolicy } = require('../controller/PolicyController');
 const { addToCart, getCartItems, removeCartItem, updateCartItemQuantity } = require('../controller/CartController');
 const { addShippingAddress, setActiveShippingAddress, getUserShippingAddresses, getActiveShippingAddress } = require('../controller/ShippingAddressController');
-const { createOrder, completeOnlinePayment, confirmCODPayment, getUserOrders, deleteOrder, updateOrderStatus } = require('../controller/OrderController');
+const { createOrder, completeOnlinePayment, confirmCODPayment, getUserOrders, deleteOrder, updateOrderStatus, failOnlinePayment } = require('../controller/OrderController');
 
 
 
@@ -484,6 +484,13 @@ router.post('/place_order', auth("order", "Write"), createOrder);
 
 // Complete online payment (usually called via webhook or frontend callback)
 router.post('/orders/complete-payment', auth("order", "Write"), completeOnlinePayment);
+
+
+router.post(
+    "/orders/payment-failed",
+    auth("order", "Write"),
+    failOnlinePayment
+);
 
 // Confirm COD payment (mark COD order as paid, admin or user confirmation)
 router.post('/orders/:orderId/confirm-cod', auth("order", "Write"), confirmCODPayment);

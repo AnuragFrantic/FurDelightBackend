@@ -56,6 +56,12 @@ const schema = new Schema(
                 value: [{ type: String, required: false }]
             }
         ],
+        lat: {
+            type: Number,
+        },
+        long: {
+            type: Number,
+        },
 
         deleted_at: { type: Date },
         created_by: {
