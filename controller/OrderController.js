@@ -1,7 +1,7 @@
 const Orders = require('../models/Orders');
 const Cart = require('../models/Cart');
 const Razorpay = require('razorpay');
-const crypto = require('crypto');
+
 require('dotenv').config();
 
 const razorpayInstance = new Razorpay({
@@ -78,7 +78,7 @@ exports.createOrder = async (req, res) => {
         await newOrder.save();
 
         // Clear the cart
-        // await Cart.deleteMany({ user: userId });
+        await Cart.deleteMany({ user: userId });
 
         return res.status(201).json({
             error: 0,
