@@ -480,7 +480,7 @@ router.get(
 // ORder Routes
 
 
-router.post('/orders', auth("order", "Write"), createOrder);
+router.post('/place_order', auth("order", "Write"), createOrder);
 
 // Complete online payment (usually called via webhook or frontend callback)
 router.post('/orders/complete-payment', auth("order", "Write"), completeOnlinePayment);
