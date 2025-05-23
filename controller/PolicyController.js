@@ -24,12 +24,28 @@ exports.createPolicy = async (req, res) => {
 // Get all Policies (excluding soft deleted)
 exports.getAllPolicies = async (req, res) => {
     try {
-        const policies = await Policy.find({ deleted_at: null });
+        const { type, title } = req.query;
+
+        let query = { deleted_at: null };
+
+        // Add type filter if present
+        if (type) {
+            query.type = type;
+        }
+
+        // Add title filter if present
+        if (title) {
+            query.title = { $regex: new RegExp(title, 'i') }; // case-insensitive search
+        }
+
+        const policies = await Policy.find(query);
         res.status(200).json({ data: policies, error: 0 });
     } catch (err) {
         res.status(500).json({ message: 'Error fetching Policies', error: 1 });
     }
 };
+
+
 
 // Get Policy by ID
 exports.getPolicyById = async (req, res) => {

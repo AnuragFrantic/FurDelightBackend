@@ -11,6 +11,10 @@ const MyRecordsSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "UpcomingVaccination"
     },
+    pet_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Pet"
+    },
     vaccination_time: {
         type: String
     },

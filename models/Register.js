@@ -68,6 +68,7 @@ const schema = new Schema(
             type: Number,
         },
 
+
         deleted_at: { type: Date },
         created_by: {
             type: mongoose.Schema.Types.ObjectId,

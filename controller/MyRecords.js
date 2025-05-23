@@ -38,6 +38,7 @@ exports.getAllRecords = async (req, res) => {
         const records = await MyRecords.find({ user: userId })
             .populate("user", "name email")
             .populate("upcoming_vaccination", "name date time")
+            .populate("pet_id", "name breed age") // Optional populate
             .sort({ createdAt: -1 });
 
         return res.status(200).json({
@@ -56,6 +57,7 @@ exports.getAllRecords = async (req, res) => {
         });
     }
 };
+
 
 
 // Get a single record by ID

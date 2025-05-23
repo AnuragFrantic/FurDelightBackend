@@ -39,6 +39,7 @@ const { createPolicy, getAllPolicies, getPolicyById, updatePolicy, deletePolicy 
 const { addToCart, getCartItems, removeCartItem, updateCartItemQuantity } = require('../controller/CartController');
 const { addShippingAddress, setActiveShippingAddress, getUserShippingAddresses, getActiveShippingAddress } = require('../controller/ShippingAddressController');
 const { createOrder, completeOnlinePayment, confirmCODPayment, getUserOrders, deleteOrder, updateOrderStatus, failOnlinePayment } = require('../controller/OrderController');
+const { createRating, getAllRatings, getRatingById, updateRating, deleteRating, getRatingsForUser } = require('../controller/RatingController');
 
 
 
@@ -503,6 +504,32 @@ router.delete('/orders/:orderId', auth("order", "Delete"), deleteOrder);
 
 // Admin or authorized user updates payment or order status
 router.put('/orders/:orderId/status', auth("order", "Update"), updateOrderStatus);
+
+
+
+
+
+// Rating
+
+
+// Create a new rating (requires login)
+router.post('/rating', auth("rating", "Write"), createRating);
+
+// Get all ratings (public or protected based on your choice)
+router.get('/rating', getAllRatings);
+
+// Get rating by ID
+router.get('/single_rating/:ratingId', getRatingById);
+
+// Update rating by ID (requires login)
+router.put('/update_rating/:ratingId', auth("rating", "Update"), updateRating);
+
+// Delete rating by ID (requires login)
+router.delete('/delete_rating/:ratingId', auth("rating", "Delete"), deleteRating);
+router.get('/rating_user/:userId', getRatingsForUser);
+
+
+
 
 
 module.exports = router;
